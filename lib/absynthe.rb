@@ -1,0 +1,18 @@
+require 'parser/current'
+require 'absynthe/version'
+require 'absynthe/synthesizer'
+require 'absynthe/language'
+require 'absynthe/passes/expand_hole'
+require 'absynthe/passes/extract_ast'
+require 'absynthe/passes/no_hole'
+require 'absynthe/passes/prog_size'
+require 'absynthe/sygus/interpreter'
+require 'absynthe/sygus/spec'
+
+module Absynthe
+  class Error < StandardError; end
+end
+
+def s(kind, *children)
+  Parser::AST::Node.new(kind, children)
+end
