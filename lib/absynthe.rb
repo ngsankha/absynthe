@@ -1,5 +1,6 @@
 require 'parser/current'
 require 'absynthe/version'
+require 'absynthe/context'
 require 'absynthe/synthesizer'
 require 'absynthe/language'
 require 'absynthe/passes/expand_hole'

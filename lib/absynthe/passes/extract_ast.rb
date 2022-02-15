@@ -1,7 +1,8 @@
 require 'ast'
 
 class ExtractASTPass < ::AST::Processor
-  def initialize(selection, lang)
+  def initialize(ctx, selection, lang)
+    @ctx = ctx
     @selection = selection
     @lang = lang
   end
@@ -13,7 +14,7 @@ class ExtractASTPass < ::AST::Processor
     when Terminal
       if new_node.name.is_a? Symbol
         if @lang.rules.key?(new_node.name)
-          s(:hole, new_node.name)
+          s(:hole, new_node.name, @ctx.domain.top)
         else
           s(:const, new_node.name)
         end
@@ -21,7 +22,7 @@ class ExtractASTPass < ::AST::Processor
         s(:const, new_node.name)
       end
     when NonTerminal
-      s(:send, new_node.name, *new_node.args.map { |n| s(:hole, n) })
+      s(:send, new_node.name, *new_node.args.map { |n| s(:hole, n, @ctx.domain.top) })
     else
       raise AbsyntheError, "unexpected class #{new_node}"
     end

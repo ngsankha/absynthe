@@ -47,19 +47,20 @@ class AbsyntheTest < Minitest::Test
   def test_it_does_something_useful
     Dir.glob('./sygus-strings/{bikes,phone,phone-2,firstname}.sl') do |sl_file|
     # Dir.glob('./sygus-strings/*.sl') do |sl_file|
-    # Dir.glob('./sygus-strings/firstname.sl') do |sl_file|
+    # Dir.glob('./sygus-strings/dr-name.sl') do |sl_file|
       puts "==> #{sl_file}"
       ast = SXP.read_file(sl_file)
       spec = Sygus::ProblemSpec.new(ast)
       lang = spec.lang
       constraints = spec.constraints
+      ctx = Context.new
 
-      seed = s(:hole, :Start)
+      seed = s(:hole, :Start, ctx.domain.top)
       q = FastContainers::PriorityQueue.new(:min)
       q.push(seed, ProgSizePass.prog_size(seed))
       begin
         Timeout::timeout(60) do
-          prog = synthesize(spec, q)
+          prog = synthesize(ctx, spec, q)
           puts Sygus::unparse(prog)
         end
       rescue Exception => e
