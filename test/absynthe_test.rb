@@ -45,8 +45,9 @@ class AbsyntheTest < Minitest::Test
   end
 
   def test_it_does_something_useful
-    skip
-    Dir.glob('./sygus-strings/{bikes,phone,phone-2,firstname}.sl') do |sl_file|
+    # Dir.glob('./sygus-strings/{bikes,phone,phone-2,firstname}.sl') do |sl_file|
+    # Dir.glob('./sygus-strings/*.sl') do |sl_file|
+    Dir.glob('./sygus-strings/firstname.sl') do |sl_file|
       puts "==> #{sl_file}"
       ast = SXP.read_file(sl_file)
       spec = Sygus::ProblemSpec.new(ast)
@@ -58,7 +59,8 @@ class AbsyntheTest < Minitest::Test
       q.push(seed, -1 * ProgSizePass.prog_size(seed))
       begin
         Timeout::timeout(60) do
-          puts synthesize(spec, q)
+          prog = synthesize(spec, q)
+          puts Sygus::unparse(prog)
         end
       rescue Exception => e
         puts e

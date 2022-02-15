@@ -85,4 +85,22 @@ module Sygus
       end
     end
   end
+
+  def self.unparse(node)
+    case node.type
+    when :const
+      konst = node.children[0]
+      case konst
+      when Integer, true, false, Symbol
+        konst.to_s
+      when String
+        konst.inspect
+      else
+        raise AbsyntheError, "unexpected constant type"
+      end
+    when :send
+      args = node.children[1..].map { |n| unparse(n) }.join(" ")
+      "(#{node.children[0]} #{args})"
+    end
+  end
 end

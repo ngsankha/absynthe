@@ -3,6 +3,7 @@ def synthesize(spec, q)
   constraints = spec.constraints
 
   until q.empty? do
+    # puts q.size
     current = q.pop
     pass = ExpandHolePass.new(lang)
     expanded = pass.process(current)
@@ -12,10 +13,12 @@ def synthesize(spec, q)
         extract_pass = ExtractASTPass.new(selection, lang)
         prog = extract_pass.process(expanded)
         if NoHolePass.has_hole?(prog)
-          q.push(prog, -1 * ProgSizePass.prog_size(prog))
+          size = ProgSizePass.prog_size(prog)
+          q.push(prog, -1 * size) if size <= 10
         elsif spec.test_prog(prog)
           return prog
         end
       }
   end
+  raise AbsyntheError, "No candidates found!"
 end

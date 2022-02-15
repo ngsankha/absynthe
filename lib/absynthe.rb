@@ -10,9 +10,7 @@ require 'absynthe/sygus/interpreter'
 require 'absynthe/sygus/spec'
 require 'absynthe/sygus/prefix-interpreter'
 
-module Absynthe
-  class Error < StandardError; end
-end
+class AbsyntheError < StandardError; end
 
 def s(kind, *children)
   Parser::AST::Node.new(kind, children)
