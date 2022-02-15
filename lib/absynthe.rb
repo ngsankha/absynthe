@@ -8,6 +8,7 @@ require 'absynthe/passes/no_hole'
 require 'absynthe/passes/prog_size'
 require 'absynthe/sygus/interpreter'
 require 'absynthe/sygus/spec'
+require 'absynthe/sygus/prefix-interpreter'
 
 module Absynthe
   class Error < StandardError; end
