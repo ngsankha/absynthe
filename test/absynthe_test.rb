@@ -1,6 +1,6 @@
 require "test_helper"
 require "sxp"
-require "algorithms"
+require "fc"
 require "timeout"
 
 class AbsyntheTest < Minitest::Test
@@ -45,9 +45,9 @@ class AbsyntheTest < Minitest::Test
   end
 
   def test_it_does_something_useful
-    # Dir.glob('./sygus-strings/{bikes,phone,phone-2,firstname}.sl') do |sl_file|
+    Dir.glob('./sygus-strings/{bikes,phone,phone-2,firstname}.sl') do |sl_file|
     # Dir.glob('./sygus-strings/*.sl') do |sl_file|
-    Dir.glob('./sygus-strings/firstname.sl') do |sl_file|
+    # Dir.glob('./sygus-strings/firstname.sl') do |sl_file|
       puts "==> #{sl_file}"
       ast = SXP.read_file(sl_file)
       spec = Sygus::ProblemSpec.new(ast)
@@ -55,8 +55,8 @@ class AbsyntheTest < Minitest::Test
       constraints = spec.constraints
 
       seed = s(:hole, :Start)
-      q = Containers::PriorityQueue.new
-      q.push(seed, -1 * ProgSizePass.prog_size(seed))
+      q = FastContainers::PriorityQueue.new(:min)
+      q.push(seed, ProgSizePass.prog_size(seed))
       begin
         Timeout::timeout(60) do
           prog = synthesize(spec, q)

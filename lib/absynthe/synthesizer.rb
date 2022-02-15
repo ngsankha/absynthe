@@ -4,7 +4,8 @@ def synthesize(spec, q)
 
   until q.empty? do
     # puts q.size
-    current = q.pop
+    current = q.top
+    q.pop
     pass = ExpandHolePass.new(lang)
     expanded = pass.process(current)
     expand_map = pass.expand_map.map { |i| i.times.to_a }
@@ -14,7 +15,7 @@ def synthesize(spec, q)
         prog = extract_pass.process(expanded)
         if NoHolePass.has_hole?(prog)
           size = ProgSizePass.prog_size(prog)
-          q.push(prog, -1 * size) if size <= 10
+          q.push(prog, size) if size <= 10
         elsif spec.test_prog(prog)
           return prog
         end
