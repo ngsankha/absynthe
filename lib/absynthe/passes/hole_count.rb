@@ -1,20 +1,20 @@
 require 'ast'
 
-class NoHolePass < ::AST::Processor
-  attr_reader :has_holes
+class HoleCountPass < ::AST::Processor
+  attr_reader :num_holes
 
-  def self.has_hole?(node)
-    visitor = NoHolePass.new
+  def self.holes(node)
+    visitor = HoleCountPass.new
     visitor.process(node)
-    visitor.has_holes
+    visitor.num_holes
   end
 
   def initialize
-    @has_holes = false
+    @num_holes = 0
   end
 
   def on_hole(node)
-    @has_holes = true
+    @num_holes += 1
     node
   end
 

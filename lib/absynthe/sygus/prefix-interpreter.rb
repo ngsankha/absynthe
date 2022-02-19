@@ -1,80 +1,73 @@
 class AbstractDomain
-  def self.top
-    raise AbsyntheError, "Not implemented!"
-  end
-
-  def self.bot
-    raise AbsyntheError, "Not implemented!"
-  end
-
-  def <=(rhs)
-    raise AbsyntheError, "Not implemented!"
-  end
-
-  def ==(rhs)
-    raise AbsyntheError, "Not implemented!"
-  end
-
-  def top?
-    raise AbsyntheError, "Not implemented!"
-  end
-
-  def bot?
-    raise AbsyntheError, "Not implemented!"
-  end
-
-  def self.from(val)
-    raise AbsyntheError, "Not implemented!"
-  end
-
-  def hash
-    raise AbsyntheError, "Not implemented!"
-  end
+  # TODO: fill the template methods
 end
 
 module Sygus
   class StringPrefix < AbstractDomain
-    attr_reader :prefix
+    attr_reader :attrs, :variant
 
-    def initialize(prefix)
-      @prefix = prefix
+    private_class_method :new
+
+    def initialize(variant, **attrs)
+      @variant = variant
+      @attrs = attrs
+      freeze
     end
 
     def self.top
-      StringPrefix.new("")
+      new(:top)
     end
 
     def self.bot
-      StringPrefix.new(-1)
+      new(:bot)
+    end
+
+    def self.var(name)
+      new(:var, name: name)
+    end
+
+    def self.val(prefix, const_str)
+      new(:val, prefix: prefix, const_str: const_str)
     end
 
     def top?
-      @prefix == ""
+      @variant == :top
     end
 
     def bot?
-      @prefix == -1
+      @variant == :bot
+    end
+
+    def var?
+      @variant == :var
+    end
+
+    def val?
+      @variant == :val
     end
 
     def <=(rhs)
       raise AbsyntheError, "Unexptected type error" if rhs.class != self.class
       lhs = self
+      return true if lhs.var? || rhs.var?
       return true if rhs.top?
       return true if lhs.bot?
-      lhs.prefix.start_with?(rhs.prefix)
+      return false if lhs.top?
+      return false if rhs.bot?
+      lhs.attrs[:prefix].start_with?(rhs.attrs[:prefix])
     end
 
     def ==(rhs)
       raise AbsyntheError, "Unexptected type error" if rhs.class != self.class
-      @prefix == rhs.prefix
+      @variant == rhs.variant && @attrs == rhs.attrs
     end
 
     def self.from(val)
       case val
-      when String, Symbol
-        StringPrefix.new(val)
+      when String
+        StringPrefix.val(val, true)
       when Integer, true, false
-        StringPrefix::bot
+        StringPrefix.bot
       else
         raise AbsyntheError, "unexpected type"
       end
@@ -85,13 +78,15 @@ module Sygus
         "⊤"
       elsif bot?
         "⊥"
+      elsif var?
+        "?#{@attrs[:name]}"
       else
-        @prefix
+        if @attrs[:const_str]
+          "\"#{@attrs[:prefix]}\""
+        else
+          @attrs[:prefix]
+        end
       end
-    end
-
-    def hash
-      @prefix.hash
     end
   end
 
@@ -115,7 +110,23 @@ module Sygus
         case node.children[0]
         when :"str.++"
           arg0 = interpret(env, node.children[1])
-          arg0
+
+          if arg0.val?
+            arg1 = interpret(env, node.children[2])
+            if arg1.val?
+              if arg1.attrs[:const_str]
+                StringPrefix.val(arg0.attrs[:prefix] + arg1.attrs[:prefix], true)
+              else
+                StringPrefix.val(arg0.attrs[:prefix] + arg1.attrs[:prefix], false)
+              end
+            elsif arg1.var?
+              arg1
+            else
+              arg0
+            end
+          else
+            arg0
+          end
         when :"str.replace"
           StringPrefix.top
         when :"str.at"
@@ -143,6 +154,10 @@ module Sygus
         else
           raise AbsyntheError, "unexpected AST node"
         end
+      when :hole
+        node.children[1]
+      else
+        raise AbsyntheError, "unexpected AST node #{node.type}"
       end
     end
   end

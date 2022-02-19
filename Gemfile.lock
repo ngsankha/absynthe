@@ -6,16 +6,24 @@ PATH
 GEM
   remote: https://rubygems.org/
   specs:
+    ansi (1.5.0)
     ast (2.4.2)
+    builder (3.2.4)
     link_header (0.0.8)
     matrix (0.4.2)
     minitest (5.14.4)
+    minitest-reporters (1.5.0)
+      ansi
+      builder
+      minitest (>= 5.0)
+      ruby-progressbar
     parser (3.1.0.0)
       ast (~> 2.4.1)
     priority_queue_cxx (0.3.4)
     rake (12.3.2)
     rdf (3.2.3)
       link_header (~> 0.0, >= 0.0.8)
+    ruby-progressbar (1.11.0)
     sxp (1.2.1)
       matrix
       rdf (~> 3.2)
@@ -26,6 +34,7 @@ PLATFORMS
 DEPENDENCIES
   absynthe!
   minitest (~> 5.0)
+  minitest-reporters
   parser (~> 3.1)
   priority_queue_cxx (~> 0.3.4)
   rake (~> 12.0)

@@ -3,15 +3,37 @@ require 'ast'
 class ExpandHolePass < ::AST::Processor
   attr_reader :expand_map
 
-  def initialize(lang)
+  def initialize(ctx, lang)
+    @ctx = ctx
     @lang = lang
     @expand_map = []
   end
 
   def on_hole(node)
-    expanded = @lang.rules[node.children[0]]
+    goal = node.children[1]
+    rules = @lang.rules[node.children[0]]
+    expanded = rules.map { |r|
+      case r
+      when Terminal
+        if r.name.is_a? Symbol
+          if @lang.rules.key?(r.name)
+            s(:hole, r.name, goal)
+          else
+            s(:const, r.name)
+          end
+        else
+          s(:const, r.name)
+        end
+      when NonTerminal
+        args = r.args.map { |n| s(:hole, n, @ctx.domain.var(:x)) }
+        s(:send, r.name, *args)
+      else
+        raise AbsyntheError, "unexpected class #{r}"
+      end
+    }
+
     @expand_map << expanded.size
-    s(:filled_hole, *expanded)
+    s(:filled_hole, goal, *expanded)
   end
 
   def handler_missing(node)

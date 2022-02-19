@@ -4,15 +4,16 @@ require "fc"
 require "timeout"
 
 class AbsyntheTest < Minitest::Test
-  def test_that_it_has_a_version_number
+  def test_that_absynthe_has_a_version_number
     refute_nil ::Absynthe::VERSION
   end
 
   def test_string_prefix_domain
-    top = Sygus::StringPrefix::top
-    bot = Sygus::StringPrefix::bot
-    dom1 = Sygus::StringPrefix.new("Dr")
-    dom2 = Sygus::StringPrefix.new("Dr. ")
+    top = Sygus::StringPrefix.top
+    bot = Sygus::StringPrefix.bot
+    dom1 = Sygus::StringPrefix.val("Dr", true)
+    dom2 = Sygus::StringPrefix.val("Dr. ", true)
+    var = Sygus::StringPrefix.var(:x)
 
     assert bot <= top
     assert dom1 <= top
@@ -20,6 +21,16 @@ class AbsyntheTest < Minitest::Test
     assert bot <= dom1
     assert bot <= dom2
     assert dom2 <= dom1
+
+    assert var <= top
+    assert var <= bot
+    assert var <= dom1
+    assert var <= dom2
+
+    assert top <= var
+    assert bot <= var
+    assert dom1 <= var
+    assert dom2 <= var
 
     assert dom2 != dom1
     assert top == top
@@ -39,34 +50,17 @@ class AbsyntheTest < Minitest::Test
                   s(:const, 0)))))
 
     res = Sygus::PrefixInterpreter.interpret({:name => "Sankha Guria"}, prog)
-    assert_equal "#{res}", "Dr."
+    assert_equal "#{res}", "\"Dr. \""
     res = Sygus::interpret({:name => "Sankha Guria"}, prog)
     assert_equal res, "Dr. Sankha"
   end
 
-  def test_it_does_something_useful
-    Dir.glob('./sygus-strings/{bikes,phone,phone-2,firstname}.sl') do |sl_file|
-    # Dir.glob('./sygus-strings/*.sl') do |sl_file|
-    # Dir.glob('./sygus-strings/dr-name.sl') do |sl_file|
-      puts "==> #{sl_file}"
-      ast = SXP.read_file(sl_file)
-      spec = Sygus::ProblemSpec.new(ast)
-      lang = spec.lang
-      constraints = spec.constraints
-      ctx = Context.new
+  def test_interp_partial_program
+    prog = s(:send, :"str.++", s(:const, "Dr."),
+            s(:send, :"str.++", s(:const, " "),
+              s(:hole, :ntString, Sygus::StringPrefix.top)))
 
-      seed = s(:hole, :Start, ctx.domain.top)
-      q = FastContainers::PriorityQueue.new(:min)
-      q.push(seed, ProgSizePass.prog_size(seed))
-      begin
-        Timeout::timeout(60) do
-          prog = synthesize(ctx, spec, q)
-          puts Sygus::unparse(prog)
-        end
-      rescue Exception => e
-        puts e
-      end
-    end
-    assert true
+    res = Sygus::PrefixInterpreter.interpret({:name => "Sankha Guria"}, prog)
+    assert res <= Sygus::StringPrefix.val("Dr. ", true)
   end
 end

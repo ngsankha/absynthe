@@ -1,11 +1,11 @@
 require 'ast'
 
-class ExtractASTPass < ::AST::Processor
-  def initialize(selection)
-    @selection = selection
+class PartialConcretizePass < ::AST::Processor
+  def initialize(lang)
+    @lang = lang
   end
 
-  def on_filled_hole(node)
+  def on_partial_conc(node)
     # first node is the goal abstract value
     idx = @selection.shift + 1
     node.children[idx]

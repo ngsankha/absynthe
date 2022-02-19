@@ -3,23 +3,36 @@ def synthesize(ctx, spec, q)
   constraints = spec.constraints
 
   until q.empty? do
-    # puts q.size
     current = q.top
     q.pop
-    pass = ExpandHolePass.new(lang)
+    pass = ExpandHolePass.new(ctx, lang)
     expanded = pass.process(current)
     expand_map = pass.expand_map.map { |i| i.times.to_a }
-    expand_map[0].product(*expand_map[1..expand_map.size])
-      .map { |selection|
-        extract_pass = ExtractASTPass.new(ctx, selection, lang)
+    expand_map[0].product(*expand_map[1..])
+      .each { |selection|
+        extract_pass = ExtractASTPass.new(selection)
         prog = extract_pass.process(expanded)
-        if NoHolePass.has_hole?(prog)
-          size = ProgSizePass.prog_size(prog)
-          q.push(prog, size) if size <= ctx.max_size
+        num_holes = HoleCountPass.holes(prog)
+        if num_holes > 0
+          # if not satisfied by goal abstract value, program is rejected
+          absval = Sygus::PrefixInterpreter.interpret(ctx.init_env, prog)
+          src = Sygus::unparse(prog)
+          if absval <= ctx.goal
+            # puts "#{src} :: #{absval}"
+            size = ProgSizePass.prog_size(prog)
+            q.push(prog, size) if size <= ctx.max_size
+          end
         elsif spec.test_prog(prog)
           return prog
         end
       }
   end
   raise AbsyntheError, "No candidates found!"
+end
+
+def score(prog)
+  num_holes = HoleCountPass.holes(prog)
+  size = ProgSizePass.prog_size(prog)
+  # (num_holes * 100) + size
+  size
 end
