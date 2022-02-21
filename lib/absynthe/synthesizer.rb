@@ -15,7 +15,7 @@ def synthesize(ctx, spec, q)
         num_holes = HoleCountPass.holes(prog)
         if num_holes > 0
           # if not satisfied by goal abstract value, program is rejected
-          absval = Sygus::PrefixInterpreter.interpret(ctx.init_env, prog)
+          absval = Sygus::SuffixInterpreter.interpret(ctx.init_env, prog)
           src = Sygus::unparse(prog)
           if absval <= ctx.goal
             # puts "#{src} :: #{absval}"

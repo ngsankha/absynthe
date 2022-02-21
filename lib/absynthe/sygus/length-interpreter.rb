@@ -1,9 +1,5 @@
-class AbstractDomain
-  # TODO: fill the template methods
-end
-
 module Sygus
-  class StringPrefix < AbstractDomain
+  class StringLength < AbstractDomain
     attr_reader :attrs, :variant
 
     private_class_method :new
@@ -26,8 +22,8 @@ module Sygus
       new(:var, name: name)
     end
 
-    def self.val(prefix, const_str)
-      new(:val, prefix: prefix, const_str: const_str)
+    def self.val(l, u)
+      new(:val, l: l, u: u)
     end
 
     def top?
@@ -54,7 +50,7 @@ module Sygus
       return true if lhs.bot?
       return false if lhs.top?
       return false if rhs.bot?
-      lhs.attrs[:prefix].start_with?(rhs.attrs[:prefix])
+      lhs.attrs[:l] <= rhs.attrs[:l] && rhs.attrs[:u] <= lhs.attrs[:u]
     end
 
     def ==(rhs)
@@ -65,9 +61,9 @@ module Sygus
     def self.from(val)
       case val
       when String
-        StringPrefix.val(val, true)
+        StringLength.val(val.length, val.length)
       when Integer, true, false
-        StringPrefix.bot
+        StringLength.bot
       else
         raise AbsyntheError, "unexpected type"
       end
@@ -81,16 +77,12 @@ module Sygus
       elsif var?
         "?#{@attrs[:name]}"
       else
-        if @attrs[:const_str]
-          "\"#{@attrs[:prefix]}\""
-        else
-          @attrs[:prefix]
-        end
+        "[#{@attrs[:l]}, #{@attrs[:u]}]"
       end
     end
   end
 
-  class PrefixInterpreter
+  class StringLengthInterpreter
     def self.interpret(env, node)
       case node.type
       when :const
@@ -99,7 +91,7 @@ module Sygus
         when AbstractDomain
           konst
         when String, Integer, true, false
-          StringPrefix.from(konst)
+          StringLength.from(konst)
         when Symbol
           # assume all environment maps to abstract values
           env[konst]
@@ -110,47 +102,54 @@ module Sygus
         case node.children[0]
         when :"str.++"
           arg0 = interpret(env, node.children[1])
+          arg1 = interpret(env, node.children[2])
 
-          if arg0.val? && arg0.attrs[:const_str]
-            arg1 = interpret(env, node.children[2])
-            if arg1.val?
-              if arg1.attrs[:const_str]
-                StringPrefix.val(arg0.attrs[:prefix] + arg1.attrs[:prefix], true)
-              else
-                StringPrefix.val(arg0.attrs[:prefix] + arg1.attrs[:prefix], false)
-              end
-            elsif arg1.var?
-              arg1
-            else
-              arg0
-            end
+          if arg0.val? && arg1.val?
+            StringLength.val(
+              arg0.attrs[:l] + arg1.attrs[:l],
+              arg0.attrs[:u] + arg1.attrs[:u])
+          elsif arg0.bot? || arg1.bot?
+            StringLength.bot
+          elsif arg0.var? || arg1.var?
+            # TODO: needs a fresh variable name here
+            StringLength.var(:x)
+          else
+            StringLength.top
+          end
+        when :"str.replace"
+          StringLength.top
+        when :"str.at"
+          arg0 = interpret(env, node.children[1])
+          if arg0.bot?
+            arg0
+          else
+            StringLength.val(0, 1)
+          end
+        when :"int.to.str"
+          StringLength.top
+        when :"str.substr"
+          arg0 = interpret(env, node.children[1])
+          if arg0.val?
+            StringLength.val(0, arg0.attrs[:u])
           else
             arg0
           end
-        when :"str.replace"
-          StringPrefix.top
-        when :"str.at"
-          StringPrefix.top
-        when :"int.to.str"
-          StringPrefix.top
-        when :"str.substr"
-          StringPrefix.top
         when :+
-          StringPrefix.bot
+          StringLength.bot
         when :-
-          StringPrefix.bot
+          StringLength.bot
         when :"str.len"
-          StringPrefix.bot
+          StringLength.bot
         when :"str.to.int"
-          StringPrefix.bot
+          StringLength.bot
         when :"str.indexof"
-          StringPrefix.bot
+          StringLength.bot
         when :"str.prefixof"
-          StringPrefix.bot
+          StringLength.bot
         when :"str.suffixof"
-          StringPrefix.bot
+          StringLength.bot
         when :"str.contains"
-          StringPrefix.bot
+          StringLength.bot
         else
           raise AbsyntheError, "unexpected AST node"
         end

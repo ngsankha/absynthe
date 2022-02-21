@@ -3,7 +3,7 @@ class AbstractDomain
 end
 
 module Sygus
-  class StringPrefix < AbstractDomain
+  class StringSuffix < AbstractDomain
     attr_reader :attrs, :variant
 
     private_class_method :new
@@ -26,8 +26,8 @@ module Sygus
       new(:var, name: name)
     end
 
-    def self.val(prefix, const_str)
-      new(:val, prefix: prefix, const_str: const_str)
+    def self.val(suffix, const_str)
+      new(:val, suffix: suffix, const_str: const_str)
     end
 
     def top?
@@ -54,7 +54,7 @@ module Sygus
       return true if lhs.bot?
       return false if lhs.top?
       return false if rhs.bot?
-      lhs.attrs[:prefix].start_with?(rhs.attrs[:prefix])
+      lhs.attrs[:suffix].end_with?(rhs.attrs[:suffix])
     end
 
     def ==(rhs)
@@ -65,9 +65,9 @@ module Sygus
     def self.from(val)
       case val
       when String
-        StringPrefix.val(val, true)
+        StringSuffix.val(val, true)
       when Integer, true, false
-        StringPrefix.bot
+        StringSuffix.bot
       else
         raise AbsyntheError, "unexpected type"
       end
@@ -82,15 +82,15 @@ module Sygus
         "?#{@attrs[:name]}"
       else
         if @attrs[:const_str]
-          "\"#{@attrs[:prefix]}\""
+          "\"#{@attrs[:suffix]}\""
         else
-          @attrs[:prefix]
+          @attrs[:suffix]
         end
       end
     end
   end
 
-  class PrefixInterpreter
+  class SuffixInterpreter
     def self.interpret(env, node)
       case node.type
       when :const
@@ -99,7 +99,7 @@ module Sygus
         when AbstractDomain
           konst
         when String, Integer, true, false
-          StringPrefix.from(konst)
+          StringSuffix.from(konst)
         when Symbol
           # assume all environment maps to abstract values
           env[konst]
@@ -110,47 +110,47 @@ module Sygus
         case node.children[0]
         when :"str.++"
           arg0 = interpret(env, node.children[1])
+          arg1 = interpret(env, node.children[2])
 
-          if arg0.val? && arg0.attrs[:const_str]
-            arg1 = interpret(env, node.children[2])
-            if arg1.val?
-              if arg1.attrs[:const_str]
-                StringPrefix.val(arg0.attrs[:prefix] + arg1.attrs[:prefix], true)
+          if arg1.val? && arg1.attrs[:const_str]
+            if arg0.val?
+              if arg0.attrs[:const_str]
+                StringSuffix.val(arg0.attrs[:suffix] + arg1.attrs[:suffix], true)
               else
-                StringPrefix.val(arg0.attrs[:prefix] + arg1.attrs[:prefix], false)
+                StringSuffix.val(arg0.attrs[:suffix] + arg1.attrs[:suffix], false)
               end
-            elsif arg1.var?
-              arg1
-            else
+            elsif arg0.var?
               arg0
+            else
+              arg1
             end
           else
-            arg0
+            arg1
           end
         when :"str.replace"
-          StringPrefix.top
+          StringSuffix.top
         when :"str.at"
-          StringPrefix.top
+          StringSuffix.top
         when :"int.to.str"
-          StringPrefix.top
+          StringSuffix.top
         when :"str.substr"
-          StringPrefix.top
+          StringSuffix.top
         when :+
-          StringPrefix.bot
+          StringSuffix.bot
         when :-
-          StringPrefix.bot
+          StringSuffix.bot
         when :"str.len"
-          StringPrefix.bot
+          StringSuffix.bot
         when :"str.to.int"
-          StringPrefix.bot
+          StringSuffix.bot
         when :"str.indexof"
-          StringPrefix.bot
-        when :"str.prefixof"
-          StringPrefix.bot
+          StringSuffix.bot
         when :"str.suffixof"
-          StringPrefix.bot
+          StringSuffix.bot
+        when :"str.suffixof"
+          StringSuffix.bot
         when :"str.contains"
-          StringPrefix.bot
+          StringSuffix.bot
         else
           raise AbsyntheError, "unexpected AST node"
         end

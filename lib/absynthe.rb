@@ -10,6 +10,8 @@ require 'absynthe/passes/prog_size'
 require 'absynthe/sygus/interpreter'
 require 'absynthe/sygus/spec'
 require 'absynthe/sygus/prefix-interpreter'
+require 'absynthe/sygus/suffix-interpreter'
+require 'absynthe/sygus/length-interpreter'
 
 class AbsyntheError < StandardError; end
 
