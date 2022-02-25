@@ -15,15 +15,18 @@ def synthesize(ctx, spec, q)
         num_holes = HoleCountPass.holes(prog)
         if num_holes > 0
           # if not satisfied by goal abstract value, program is rejected
-          absval = Sygus::SuffixInterpreter.interpret(ctx.init_env, prog)
+          # absval = Sygus::ProductInterpreter.interpret(ctx.init_env, prog)
           src = Sygus::unparse(prog)
-          if absval <= ctx.goal
+          if true # absval <= ctx.goal
             # puts "#{src} :: #{absval}"
             size = ProgSizePass.prog_size(prog)
             q.push(prog, size) if size <= ctx.max_size
           end
-        elsif spec.test_prog(prog)
-          return prog
+        else
+          # puts Sygus::unparse(prog)
+          if spec.test_prog(prog)
+            return prog
+          end
         end
       }
   end

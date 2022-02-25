@@ -9,11 +9,11 @@ class AbsyntheTest < Minitest::Test
   end
 
   def test_string_prefix_domain
-    top = Sygus::StringPrefix.top
-    bot = Sygus::StringPrefix.bot
-    dom1 = Sygus::StringPrefix.val("Dr", true)
-    dom2 = Sygus::StringPrefix.val("Dr. ", true)
-    var = Sygus::StringPrefix.var(:x)
+    top = StringPrefix.top
+    bot = StringPrefix.bot
+    dom1 = StringPrefix.val("Dr", true)
+    dom2 = StringPrefix.val("Dr. ", true)
+    var = StringPrefix.var(:x)
 
     assert bot <= top
     assert dom1 <= top
@@ -55,12 +55,31 @@ class AbsyntheTest < Minitest::Test
     assert_equal res, "Dr. Sankha"
   end
 
+  def test_sygus_conc_interpreter
+    prog = s(:send, :"str.++", s(:const, :lastname),
+            s(:send, :"str.++", s(:const, " "),
+              s(:const, :firstname)))
+
+    res = Sygus::interpret({:firstname => "Launa", :lastname => "Withers"}, prog)
+    assert_equal res, "Withers Launa"
+  end
+
+  def test_sygus_test_from_spec
+    prog = s(:send, :"str.++", s(:const, :lastname),
+            s(:send, :"str.++", s(:const, " "),
+              s(:const, :firstname)))
+
+    ast = SXP.read_file('./sygus-strings/reverse-name.sl')
+    spec = Sygus::ProblemSpec.new(ast)
+    assert spec.test_prog(prog)
+  end
+
   def test_interp_partial_program
     prog = s(:send, :"str.++", s(:const, "Dr."),
             s(:send, :"str.++", s(:const, " "),
-              s(:hole, :ntString, Sygus::StringPrefix.top)))
+              s(:hole, :ntString, StringPrefix.top)))
 
     res = Sygus::PrefixInterpreter.interpret({:name => "Sankha Guria"}, prog)
-    assert res <= Sygus::StringPrefix.val("Dr. ", true)
+    assert res <= StringPrefix.val("Dr. ", true)
   end
 end

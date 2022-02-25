@@ -1,16 +1,22 @@
 module Sygus
   class ProblemSpec
-    attr_reader :func_name, :args, :ret_type, :lang, :constraints
+    attr_reader :func_name, :args, :ret_type, :lang, :constraints, :init_env
 
     def initialize(ast)
       @constraints = []
+      @init_env = {}
       eval(ast)
     end
 
     def test_prog(prog)
       begin
-        @constraints.all? { |val|
-          Sygus::interpret({:name => val[0]}, prog) == val[1]
+        @constraints.all? { |input, output|
+          env = @init_env.dup
+          args.zip(input).each { |node, argval|
+            arg_name = node[0]
+            env[arg_name] = argval
+          }
+          Sygus::interpret(env, prog) == output
         }
       rescue
         false
@@ -51,7 +57,7 @@ module Sygus
     def get_arg(node)
       case node[0]
       when @func_name
-        node[1]
+        node[1..]
       else
         raise AbsyntheError, "expected function name to be in language spec"
       end
@@ -76,6 +82,9 @@ module Sygus
         @ret_type = node[3]
         @lang = eval_lang_spec(node[4])
       when :"declare-var"
+        varname = node[1]
+        vartype = node[2]
+        @init_env[varname] = vartype
         return
       when :constraint
         @constraints << eval_constraint(node[1])

@@ -1,108 +1,35 @@
 require "test_helper"
-require "sxp"
-require "fc"
-require "timeout"
 
 class SygusTest < Minitest::Test
-  # def test_dr_name
-  #   ast = SXP.read_file('./sygus-strings/dr-name.sl')
-  #   spec = Sygus::ProblemSpec.new(ast)
-  #   lang = spec.lang
-  #   constraints = spec.constraints
-  #   ctx = Context.new({:name => Sygus::StringPrefix.top}, Sygus::StringPrefix.val("Dr. ", false))
+  extend SygusTestRunner
 
-  #   seed = s(:hole, :Start, ctx.goal)
-  #   q = FastContainers::PriorityQueue.new(:min)
-  #   q.push(seed, ProgSizePass.prog_size(seed))
-  #   Timeout::timeout(5 * 60) do
-  #     prog = synthesize(ctx, spec, q)
-  #     puts Sygus::unparse(prog)
-  #   end
-  #   assert true
-  # end
-
-  # def test_bikes
-  #   ast = SXP.read_file('./sygus-strings/bikes.sl')
-  #   spec = Sygus::ProblemSpec.new(ast)
-  #   lang = spec.lang
-  #   constraints = spec.constraints
-  #   ctx = Context.new({:name => Sygus::StringPrefix.top}, Sygus::StringPrefix.top)
-
-  #   seed = s(:hole, :Start, ctx.goal)
-  #   q = FastContainers::PriorityQueue.new(:min)
-  #   q.push(seed, ProgSizePass.prog_size(seed))
-  #   Timeout::timeout(5 * 60) do
-  #     prog = synthesize(ctx, spec, q)
-  #     puts Sygus::unparse(prog)
-  #   end
-  #   assert true
-  # end
-
-  # def test_phone
-  #   ast = SXP.read_file('./sygus-strings/phone.sl')
-  #   spec = Sygus::ProblemSpec.new(ast)
-  #   lang = spec.lang
-  #   constraints = spec.constraints
-  #   ctx = Context.new({:name => Sygus::StringPrefix.top}, Sygus::StringPrefix.top)
-
-  #   seed = s(:hole, :Start, ctx.goal)
-  #   q = FastContainers::PriorityQueue.new(:min)
-  #   q.push(seed, ProgSizePass.prog_size(seed))
-  #   Timeout::timeout(5 * 60) do
-  #     prog = synthesize(ctx, spec, q)
-  #     puts Sygus::unparse(prog)
-  #   end
-  #   assert true
-  # end
-
-  # def test_phone_2
-  #   ast = SXP.read_file('./sygus-strings/phone-2.sl')
-  #   spec = Sygus::ProblemSpec.new(ast)
-  #   lang = spec.lang
-  #   constraints = spec.constraints
-  #   ctx = Context.new({:name => Sygus::StringPrefix.top}, Sygus::StringPrefix.top)
-
-  #   seed = s(:hole, :Start, ctx.goal)
-  #   q = FastContainers::PriorityQueue.new(:min)
-  #   q.push(seed, ProgSizePass.prog_size(seed))
-  #   Timeout::timeout(5 * 60) do
-  #     prog = synthesize(ctx, spec, q)
-  #     puts Sygus::unparse(prog)
-  #   end
-  #   assert true
-  # end
-
-  # def test_firstname
-  #   ast = SXP.read_file('./sygus-strings/firstname.sl')
-  #   spec = Sygus::ProblemSpec.new(ast)
-  #   lang = spec.lang
-  #   constraints = spec.constraints
-  #   ctx = Context.new({:name => Sygus::StringPrefix.top}, Sygus::StringPrefix.top)
-
-  #   seed = s(:hole, :Start, ctx.goal)
-  #   q = FastContainers::PriorityQueue.new(:min)
-  #   q.push(seed, ProgSizePass.prog_size(seed))
-  #   Timeout::timeout(5 * 60) do
-  #     prog = synthesize(ctx, spec, q)
-  #     puts Sygus::unparse(prog)
-  #   end
-  #   assert true
-  # end
-
-  def test_initials
-    ast = SXP.read_file('./sygus-strings/initials.sl')
-    spec = Sygus::ProblemSpec.new(ast)
-    lang = spec.lang
-    constraints = spec.constraints
-    ctx = Context.new({:name => Sygus::StringSuffix.top}, Sygus::StringSuffix.val(".", false))
-
-    seed = s(:hole, :Start, ctx.goal)
-    q = FastContainers::PriorityQueue.new(:min)
-    q.push(seed, ProgSizePass.prog_size(seed))
-    Timeout::timeout(5 * 60) do
-      prog = synthesize(ctx, spec, q)
-      puts Sygus::unparse(prog)
-    end
-    assert true
-  end
+  run_sygus_test('./sygus-strings/bikes.sl')
+  # run_sygus_test('./sygus-strings/dr-name.sl',
+  #   {:name => ProductDomain.top}, ProductDomain.val(StringPrefix.val("Dr. ", false)))
+  run_sygus_test('./sygus-strings/firstname.sl')
+  # run_sygus_test('./sygus-strings/initials.sl',
+  #   {:name => ProductDomain.top}, ProductDomain.val(StringSuffix.val(".", false), StringLength.val(4, 4)))
+  # run_sygus_test('./sygus-strings/lastname.sl')
+  # run_sygus_test('./sygus-strings/name-combine-2.sl')
+  # run_sygus_test('./sygus-strings/name-combine-3.sl')
+  # run_sygus_test('./sygus-strings/name-combine-4.sl')
+  run_sygus_test('./sygus-strings/name-combine.sl')
+  run_sygus_test('./sygus-strings/phone-1.sl')
+  # run_sygus_test('./sygus-strings/phone-10.sl')
+  run_sygus_test('./sygus-strings/phone-2.sl')
+  # run_sygus_test('./sygus-strings/phone-3.sl')
+  run_sygus_test('./sygus-strings/phone-4.sl')
+  run_sygus_test('./sygus-strings/phone-5.sl')
+  # run_sygus_test('./sygus-strings/phone-6.sl')
+  # run_sygus_test('./sygus-strings/phone-7.sl')
+  # run_sygus_test('./sygus-strings/phone-8.sl')
+  # run_sygus_test('./sygus-strings/phone-9.sl')
+  run_sygus_test('./sygus-strings/phone.sl')
+  run_sygus_test('./sygus-strings/reverse-name.sl')
+  run_sygus_test('./sygus-strings/univ_1.sl')
+  # run_sygus_test('./sygus-strings/univ_2.sl')
+  # run_sygus_test('./sygus-strings/univ_3.sl')
+  # run_sygus_test('./sygus-strings/univ_4.sl')
+  # run_sygus_test('./sygus-strings/univ_5.sl')
+  # run_sygus_test('./sygus-strings/univ_6.sl')
 end

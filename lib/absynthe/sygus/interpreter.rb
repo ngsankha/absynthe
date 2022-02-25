@@ -102,7 +102,8 @@ module Sygus
       args = node.children[1..].map { |n| unparse(n) }.join(" ")
       "(#{node.children[0]} #{args})"
     when :hole
-      "(□: #{node.children[1]})"
+      # "(□: #{node.children[1]})"
+      "□"
     else
       raise AbsyntheError, "unexpected AST node #{node.type}"
     end
