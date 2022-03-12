@@ -9,3 +9,5 @@ gem "minitest", "~> 5.0"
 gem "sxp", "~> 1.2"
 gem "parser", "~> 3.1"
 gem "priority_queue_cxx", "~> 0.3.4"
+
+gem "z3", "~> 0.0.20220203"

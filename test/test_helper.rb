@@ -14,7 +14,7 @@ module SygusTestRunner
   def run_sygus_test(src, abs_env = nil, target_abs = nil)
     test_name = File.basename(src, '.sl').gsub('-', '_')
     define_method("test_#{test_name}") do
-      # skip unless test_name == "dr_name"
+      skip unless test_name == "initials"
 
       ast = SXP.read_file(src)
       spec = Sygus::ProblemSpec.new(ast)
@@ -27,7 +27,7 @@ module SygusTestRunner
       seed = s(:hole, :Start, ctx.goal)
       q = FastContainers::PriorityQueue.new(:min)
       q.push(seed, ProgSizePass.prog_size(seed))
-      Timeout::timeout(5 * 60) do
+      Timeout::timeout(10 * 60) do
         prog = synthesize(ctx, spec, q)
         puts Sygus::unparse(prog)
       end

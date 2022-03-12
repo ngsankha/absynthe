@@ -2,6 +2,7 @@ require 'ast'
 
 class ExpandHolePass < ::AST::Processor
   attr_reader :expand_map
+  include VarName
 
   def initialize(ctx, lang)
     @ctx = ctx
@@ -25,7 +26,7 @@ class ExpandHolePass < ::AST::Processor
           s(:const, r.name)
         end
       when NonTerminal
-        args = r.args.map { |n| s(:hole, n, @ctx.domain.var(:x)) }
+        args = r.args.map { |n| s(:hole, n, @ctx.domain.var(fresh)) }
         s(:send, r.name, *args)
       else
         raise AbsyntheError, "unexpected class #{r}"

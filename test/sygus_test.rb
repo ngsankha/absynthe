@@ -5,10 +5,10 @@ class SygusTest < Minitest::Test
 
   run_sygus_test('./sygus-strings/bikes.sl')
   run_sygus_test('./sygus-strings/dr-name.sl',
-    {:name => ProductDomain.top}, ProductDomain.val(StringPrefix.val("Dr. ", false)))
+    {:name => StringPrefix.top}, StringPrefix.val("Dr. ", false))
   run_sygus_test('./sygus-strings/firstname.sl')
-  # run_sygus_test('./sygus-strings/initials.sl',
-  #   {:name => ProductDomain.top}, ProductDomain.val(StringSuffix.val(".", false), StringLength.val(4, 4)))
+  run_sygus_test('./sygus-strings/initials.sl',
+    {:name => ProductDomain.top}, ProductDomain.val(StringSuffix.val(".", false), StringLength.val(4, 4)))
   # run_sygus_test('./sygus-strings/lastname.sl')
   # run_sygus_test('./sygus-strings/name-combine-2.sl')
   # run_sygus_test('./sygus-strings/name-combine-3.sl')

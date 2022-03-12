@@ -1,11 +1,20 @@
+require 'z3'
+
 class StringLength < AbstractDomain
-  attr_reader :attrs, :variant
+  include VarName
+  attr_reader :attrs, :variant, :asserts
 
   private_class_method :new
 
   def initialize(variant, **attrs)
     @variant = variant
     @attrs = attrs
+    @asserts = []
+    if @variant == :var
+      @asserts << (attrs[:l] >= 0)
+      @asserts << (attrs[:u] >= 0)
+      @asserts << (attrs[:u] >= attrs[:l])
+    end
     freeze
   end
 
@@ -18,7 +27,7 @@ class StringLength < AbstractDomain
   end
 
   def self.var(name)
-    new(:var, name: name)
+    new(:var, l: Z3.Int("#{name}_l"), u: Z3.Int("#{name}_u"))
   end
 
   def self.val(l, u)
@@ -49,7 +58,7 @@ class StringLength < AbstractDomain
     return true if lhs.bot?
     return false if lhs.top?
     return false if rhs.bot?
-    lhs.attrs[:l] <= rhs.attrs[:l] && rhs.attrs[:u] <= lhs.attrs[:u]
+    return StringLength.var_leq(lhs, rhs)
   end
 
   def ==(rhs)
@@ -77,6 +86,27 @@ class StringLength < AbstractDomain
       "?#{@attrs[:name]}"
     else
       "[#{@attrs[:l]}, #{@attrs[:u]}]"
+    end
+  end
+
+  private
+  def self.var_leq(lhs, rhs)
+    if lhs.attrs[:l].is_a?(Z3::Expr) ||
+       lhs.attrs[:u].is_a?(Z3::Expr) ||
+       rhs.attrs[:l].is_a?(Z3::Expr) ||
+       rhs.attrs[:u].is_a?(Z3::Expr)
+      cond = (lhs.attrs[:l] <= rhs.attrs[:u]) & (rhs.attrs[:u] <= lhs.attrs[:u])
+      if cond.is_a?(Z3::Expr)
+        s = Z3::Solver.new
+        lhs.asserts.each { |a| s.assert a }
+        rhs.asserts.each { |a| s.assert a }
+        s.assert cond
+        s.satisfiable?
+      else
+        cond
+      end
+    else
+      (lhs.attrs[:l] <= rhs.attrs[:u]) && (rhs.attrs[:u] <= lhs.attrs[:u])
     end
   end
 end

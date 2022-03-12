@@ -10,6 +10,7 @@ GEM
     ast (2.4.2)
     builder (3.2.4)
     coderay (1.1.3)
+    ffi (1.15.5)
     link_header (0.0.8)
     matrix (0.4.2)
     method_source (1.0.0)
@@ -32,6 +33,8 @@ GEM
     sxp (1.2.1)
       matrix
       rdf (~> 3.2)
+    z3 (0.0.20220203)
+      ffi (~> 1.9)
 
 PLATFORMS
   ruby
@@ -45,6 +48,7 @@ DEPENDENCIES
   pry
   rake (~> 12.0)
   sxp (~> 1.2)
+  z3 (~> 0.0.20220203)
 
 BUNDLED WITH
    2.2.28

@@ -1,5 +1,11 @@
 module Sygus
-  class PrefixInterpreter
+  class PrefixInterpreter < AbstractInterpreter
+    ::DOMAIN_INTERPRETER[StringPrefix] = self
+
+    def self.domain
+      StringPrefix
+    end
+
     def self.interpret(env, node)
       case node.type
       when :const
@@ -64,7 +70,7 @@ module Sygus
           raise AbsyntheError, "unexpected AST node"
         end
       when :hole
-        node.children[1]
+        eval_hole(node)
       else
         raise AbsyntheError, "unexpected AST node #{node.type}"
       end

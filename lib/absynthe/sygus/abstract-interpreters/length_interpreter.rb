@@ -1,5 +1,11 @@
 module Sygus
-  class StringLengthInterpreter
+  class StringLengthInterpreter < AbstractInterpreter
+    ::DOMAIN_INTERPRETER[StringLength] = self
+
+    def self.domain
+      StringLength
+    end
+
     def self.interpret(env, node)
       case node.type
       when :const
@@ -21,17 +27,14 @@ module Sygus
           arg0 = interpret(env, node.children[1])
           arg1 = interpret(env, node.children[2])
 
-          if arg0.val? && arg1.val?
+          if arg0.bot? || arg1.bot?
+            StringLength.bot
+          elsif arg0.top? || arg1.top?
+            StringLength.top
+          else
             StringLength.val(
               arg0.attrs[:l] + arg1.attrs[:l],
               arg0.attrs[:u] + arg1.attrs[:u])
-          elsif arg0.bot? || arg1.bot?
-            StringLength.bot
-          elsif arg0.var? || arg1.var?
-            # TODO: needs a fresh variable name here
-            StringLength.var(:x)
-          else
-            StringLength.top
           end
         when :"str.replace"
           StringLength.top
@@ -71,7 +74,7 @@ module Sygus
           raise AbsyntheError, "unexpected AST node"
         end
       when :hole
-        node.children[1]
+        eval_hole(node)
       else
         raise AbsyntheError, "unexpected AST node #{node.type}"
       end
