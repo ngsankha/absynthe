@@ -38,6 +38,22 @@ class AbsyntheTest < Minitest::Test
     assert dom1 == dom1
   end
 
+  def test_string_suffix_var_behavior
+    var1 = StringSuffix.var('var1')
+    var2 = StringSuffix.var('var2')
+    var3 = StringSuffix.var('var1', 5)
+    dom1 = StringSuffix.val("bar", true)
+    dom2 = StringSuffix.val("foobar", true)
+
+    refute var1 <= var2
+    assert var3 <= var1
+    refute var3 <= var2
+    refute var1 <= dom1
+    refute var2 <= dom1
+    refute var3 <= dom1
+    assert dom1 <= dom2
+  end
+
   def test_string_prefix_interpreter
     prog = s(:send, :"str.++", s(:const, "Dr."),
             s(:send, :"str.++", s(:const, " "),

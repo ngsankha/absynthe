@@ -17,8 +17,8 @@ class StringSuffix < AbstractDomain
     new(:bot)
   end
 
-  def self.var(name)
-    new(:var, name: name)
+  def self.var(name, length = nil)
+    new(:var, name: name, length: length)
   end
 
   def self.val(suffix, const_str)
@@ -44,12 +44,19 @@ class StringSuffix < AbstractDomain
   def <=(rhs)
     raise AbsyntheError, "Unexptected type error" if rhs.class != self.class
     lhs = self
-    return true if lhs.var? || rhs.var?
     return true if rhs.top?
     return true if lhs.bot?
+
+    return lhs.attrs[:suffix].end_with?(rhs.attrs[:suffix]) if (lhs.val? && rhs.val?)
+
+    if lhs.var? && rhs.var?
+      if lhs.attrs[:name] == rhs.attrs[:name]
+        lhs.attrs[]
+      end
+    end
+
     return false if lhs.top?
     return false if rhs.bot?
-    lhs.attrs[:suffix].end_with?(rhs.attrs[:suffix])
   end
 
   def ==(rhs)
