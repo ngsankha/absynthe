@@ -10,10 +10,14 @@ class StringLength < AbstractDomain
     @variant = variant
     @attrs = attrs
     @asserts = []
-    if @variant == :var
+    if @variant == :var || @variant == :val
       @asserts << (attrs[:l] >= 0)
       @asserts << (attrs[:u] >= 0)
-      @asserts << (attrs[:u] >= attrs[:l])
+      if @variant == :var
+        @asserts << (attrs[:u] == attrs[:l])
+      else
+        @asserts << (attrs[:u] >= attrs[:l])
+      end
     end
     freeze
   end
@@ -97,11 +101,28 @@ class StringLength < AbstractDomain
        rhs.attrs[:u].is_a?(Z3::Expr)
       cond = (lhs.attrs[:l] <= rhs.attrs[:u]) & (rhs.attrs[:u] <= lhs.attrs[:u])
       if cond.is_a?(Z3::Expr)
-        s = Z3::Solver.new
-        lhs.asserts.each { |a| s.assert a }
-        rhs.asserts.each { |a| s.assert a }
-        s.assert cond
-        s.satisfiable?
+        read, write = IO.pipe
+
+        pid = Process.fork do
+          read.close
+          s = Z3::Solver.new
+          (lhs.asserts + rhs.asserts).each { |a|
+            if a.is_a?(Z3::Expr)
+              s.assert a
+            elsif !a # a is false
+              raise AbsyntheError, "unexpected concrete value false"
+            end
+          }
+          s.assert cond
+          Marshal.dump(s.satisfiable?, write)
+          exit
+        end
+
+        write.close
+        result = read.read
+        Process.wait pid
+        read.close
+        Marshal.load result
       else
         cond
       end
