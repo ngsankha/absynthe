@@ -42,15 +42,18 @@ class AbsyntheTest < Minitest::Test
     var1 = StringSuffix.var('var1')
     var2 = StringSuffix.var('var2')
     var3 = StringSuffix.var('var1', 5)
+    var4 = StringSuffix.var('var1', 3)
     dom1 = StringSuffix.val("bar", true)
     dom2 = StringSuffix.val("foobar", true)
 
     refute var1 <= var2
-    assert var3 <= var1
     refute var3 <= var2
     refute var1 <= dom1
     refute var2 <= dom1
     refute var3 <= dom1
+
+    assert var4 <= var1
+    assert var3 <= var4
     assert dom1 <= dom2
   end
 

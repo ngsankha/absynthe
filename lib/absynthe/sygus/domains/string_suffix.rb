@@ -51,7 +51,7 @@ class StringSuffix < AbstractDomain
 
     if lhs.var? && rhs.var?
       if lhs.attrs[:name] == rhs.attrs[:name]
-        lhs.attrs[]
+        
       end
     end
 
