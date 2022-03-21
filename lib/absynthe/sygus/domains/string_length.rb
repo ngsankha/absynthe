@@ -55,7 +55,7 @@ class StringLength < AbstractDomain
   end
 
   def <=(rhs)
-    raise AbsyntheError, "Unexptected type error" if rhs.class != self.class
+    raise AbsyntheError, "Unexpected type error" if rhs.class != self.class
     lhs = self
     return true if lhs.var? || rhs.var?
     return true if rhs.top?
@@ -66,7 +66,7 @@ class StringLength < AbstractDomain
   end
 
   def ==(rhs)
-    raise AbsyntheError, "Unexptected type error" if rhs.class != self.class
+    raise AbsyntheError, "Unexpected type error" if rhs.class != self.class
     @variant == rhs.variant && @attrs == rhs.attrs
   end
 

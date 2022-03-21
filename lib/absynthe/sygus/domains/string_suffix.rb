@@ -42,7 +42,7 @@ class StringSuffix < AbstractDomain
   end
 
   def <=(rhs)
-    raise AbsyntheError, "Unexptected type error" if rhs.class != self.class
+    raise AbsyntheError, "Unexpected type error" if rhs.class != self.class
     lhs = self
     return true if rhs.top?
     return true if lhs.bot?
@@ -60,7 +60,7 @@ class StringSuffix < AbstractDomain
   end
 
   def ==(rhs)
-    raise AbsyntheError, "Unexptected type error" if rhs.class != self.class
+    raise AbsyntheError, "Unexpected type error" if rhs.class != self.class
     @variant == rhs.variant && @attrs == rhs.attrs
   end
 

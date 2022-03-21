@@ -52,7 +52,7 @@ class ProductDomain < AbstractDomain
   end
 
   def <=(rhs)
-    raise AbsyntheError, "Unexptected type error" if rhs.class != self.class
+    raise AbsyntheError, "Unexpected type error" if rhs.class != self.class
     lhs = self
     # puts "lhs: #{lhs.inspect}"
     # puts "rhs: #{rhs.inspect}"
@@ -67,7 +67,7 @@ class ProductDomain < AbstractDomain
   end
 
   def ==(rhs)
-    raise AbsyntheError, "Unexptected type error" if rhs.class != self.class
+    raise AbsyntheError, "Unexpected type error" if rhs.class != self.class
     @variant == rhs.variant && @domains == rhs.domains
   end
 
