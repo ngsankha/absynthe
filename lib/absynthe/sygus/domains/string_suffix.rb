@@ -51,12 +51,16 @@ class StringSuffix < AbstractDomain
 
     if lhs.var? && rhs.var?
       if lhs.attrs[:name] == rhs.attrs[:name]
-        
+        return leq_nil(lhs.attrs[:length], rhs.attrs[:length])
+      else
+        return false
       end
     end
 
     return false if lhs.top?
     return false if rhs.bot?
+
+    return false
   end
 
   def ==(rhs)
@@ -88,6 +92,19 @@ class StringSuffix < AbstractDomain
       else
         @attrs[:suffix]
       end
+    end
+  end
+
+  private
+  def leq_nil(lhs, rhs)
+    if lhs && rhs
+      lhs >= rhs
+    elsif lhs
+      false
+    elsif rhs
+      true
+    else
+      false
     end
   end
 end
