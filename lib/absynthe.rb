@@ -2,6 +2,7 @@ DOMAIN_INTERPRETER = {}
 
 require 'parser/current'
 require 'absynthe/version'
+require 'absynthe/globals'
 require 'absynthe/context'
 require 'absynthe/synthesizer'
 require 'absynthe/language'

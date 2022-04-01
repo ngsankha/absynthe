@@ -13,7 +13,8 @@ class AbsyntheTest < Minitest::Test
     bot = StringPrefix.bot
     dom1 = StringPrefix.val("Dr", true)
     dom2 = StringPrefix.val("Dr. ", true)
-    var = StringPrefix.var(:x)
+    var = StringPrefix.var('x')
+    Globals.root_vars = [var]
 
     assert bot <= top
     assert dom1 <= top
@@ -24,13 +25,13 @@ class AbsyntheTest < Minitest::Test
 
     assert var <= top
     assert var <= bot
-    assert var <= dom1
-    assert var <= dom2
+    refute var <= dom1
+    refute var <= dom2
 
-    assert top <= var
+    refute top <= var
     assert bot <= var
-    assert dom1 <= var
-    assert dom2 <= var
+    refute dom1 <= var
+    refute dom2 <= var
 
     assert dom2 != dom1
     assert top == top
@@ -45,6 +46,7 @@ class AbsyntheTest < Minitest::Test
     var4 = StringSuffix.var('var1', 3)
     dom1 = StringSuffix.val("bar", true)
     dom2 = StringSuffix.val("foobar", true)
+    Globals.root_vars = [var1, var2, var3, var4]
 
     refute var1 <= var2
     refute var2 <= var1

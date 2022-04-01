@@ -1,3 +1,6 @@
+# This is a special case: it combines individual domains. Hence it redefines
+# the <= method. It does not need the glb and lub as those are only needed from
+# the generic <= method for base domains.
 class ProductDomain < AbstractDomain
   attr_reader :domains, :variant
 
@@ -16,7 +19,6 @@ class ProductDomain < AbstractDomain
       raise AbsyntheError, "only AbstractDomain allowed" unless v.is_a? AbstractDomain
       @domains[v.class] = v
     }
-    freeze
   end
 
   def self.top

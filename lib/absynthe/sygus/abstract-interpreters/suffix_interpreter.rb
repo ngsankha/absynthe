@@ -62,8 +62,6 @@ module Sygus
           StringSuffix.bot
         when :"str.suffixof"
           StringSuffix.bot
-        when :"str.suffixof"
-          StringSuffix.bot
         when :"str.contains"
           StringSuffix.bot
         else

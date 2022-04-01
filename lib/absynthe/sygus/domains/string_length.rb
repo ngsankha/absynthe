@@ -1,5 +1,3 @@
-require 'z3'
-
 class StringLength < AbstractDomain
   include VarName
   attr_reader :attrs, :variant, :asserts
@@ -9,29 +7,24 @@ class StringLength < AbstractDomain
   def initialize(variant, **attrs)
     @variant = variant
     @attrs = attrs
-    @asserts = []
-    if @variant == :var || @variant == :val
-      @asserts << (attrs[:l] >= 0)
-      @asserts << (attrs[:u] >= 0)
-      if @variant == :var
-        @asserts << (attrs[:u] == attrs[:l])
-      else
-        @asserts << (attrs[:u] >= attrs[:l])
-      end
-    end
-    freeze
   end
 
+  @@top = new(:top)
+  @@bot = new(:bot)
+
   def self.top
-    new(:top)
+    @@top
   end
 
   def self.bot
-    new(:bot)
+    @@bot
   end
 
   def self.var(name)
-    new(:var, l: Z3.Int("#{name}_l"), u: Z3.Int("#{name}_u"))
+    result = new(:var, name: name)
+    result.glb = @@bot
+    result.lub = @@top
+    result
   end
 
   def self.val(l, u)
@@ -54,15 +47,13 @@ class StringLength < AbstractDomain
     @variant == :val
   end
 
-  def <=(rhs)
-    raise AbsyntheError, "Unexpected type error" if rhs.class != self.class
-    lhs = self
-    return true if lhs.var? || rhs.var?
-    return true if rhs.top?
-    return true if lhs.bot?
-    return false if lhs.top?
-    return false if rhs.bot?
-    return StringLength.var_leq(lhs, rhs)
+  def val_leq(lhs, rhs)
+    rhs.attrs[:l] <= lhs.attrs[:l] && lhs.attrs[:u] <= rhs.attrs[:u]
+  end
+
+  def var_leq(lhs, rhs)
+    # NOTE: This assumes all ground variables are distinct
+    false
   end
 
   def ==(rhs)
@@ -93,41 +84,41 @@ class StringLength < AbstractDomain
     end
   end
 
-  private
-  def self.var_leq(lhs, rhs)
-    if lhs.attrs[:l].is_a?(Z3::Expr) ||
-       lhs.attrs[:u].is_a?(Z3::Expr) ||
-       rhs.attrs[:l].is_a?(Z3::Expr) ||
-       rhs.attrs[:u].is_a?(Z3::Expr)
-      cond = (lhs.attrs[:l] <= rhs.attrs[:u]) & (rhs.attrs[:u] <= lhs.attrs[:u])
-      if cond.is_a?(Z3::Expr)
-        read, write = IO.pipe
+  # private
+  # def self.var_leq(lhs, rhs)
+  #   if lhs.attrs[:l].is_a?(Z3::Expr) ||
+  #      lhs.attrs[:u].is_a?(Z3::Expr) ||
+  #      rhs.attrs[:l].is_a?(Z3::Expr) ||
+  #      rhs.attrs[:u].is_a?(Z3::Expr)
+  #     cond = (lhs.attrs[:l] <= rhs.attrs[:u]) & (rhs.attrs[:u] <= lhs.attrs[:u])
+  #     if cond.is_a?(Z3::Expr)
+  #       read, write = IO.pipe
 
-        pid = Process.fork do
-          read.close
-          s = Z3::Solver.new
-          (lhs.asserts + rhs.asserts).each { |a|
-            if a.is_a?(Z3::Expr)
-              s.assert a
-            elsif !a # a is false
-              raise AbsyntheError, "unexpected concrete value false"
-            end
-          }
-          s.assert cond
-          Marshal.dump(s.satisfiable?, write)
-          exit
-        end
+  #       pid = Process.fork do
+  #         read.close
+  #         s = Z3::Solver.new
+  #         (lhs.asserts + rhs.asserts).each { |a|
+  #           if a.is_a?(Z3::Expr)
+  #             s.assert a
+  #           elsif !a # a is false
+  #             raise AbsyntheError, "unexpected concrete value false"
+  #           end
+  #         }
+  #         s.assert cond
+  #         Marshal.dump(s.satisfiable?, write)
+  #         exit
+  #       end
 
-        write.close
-        result = read.read
-        Process.wait pid
-        read.close
-        Marshal.load result
-      else
-        cond
-      end
-    else
-      (lhs.attrs[:l] <= rhs.attrs[:u]) && (rhs.attrs[:u] <= lhs.attrs[:u])
-    end
-  end
+  #       write.close
+  #       result = read.read
+  #       Process.wait pid
+  #       read.close
+  #       Marshal.load result
+  #     else
+  #       cond
+  #     end
+  #   else
+  #     (lhs.attrs[:l] <= rhs.attrs[:u]) && (rhs.attrs[:u] <= lhs.attrs[:u])
+  #   end
+  # end
 end

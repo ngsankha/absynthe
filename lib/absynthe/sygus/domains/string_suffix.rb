@@ -6,19 +6,24 @@ class StringSuffix < AbstractDomain
   def initialize(variant, **attrs)
     @variant = variant
     @attrs = attrs
-    freeze
   end
 
+  @@top = new(:top)
+  @@bot = new(:bot)
+
   def self.top
-    new(:top)
+    @@top
   end
 
   def self.bot
-    new(:bot)
+    @@bot
   end
 
   def self.var(name, length = nil)
-    new(:var, name: name, length: length)
+    result = new(:var, name: name, length: length)
+    result.glb = @@bot
+    result.lub = @@top
+    result
   end
 
   def self.val(suffix, const_str)
@@ -41,27 +46,39 @@ class StringSuffix < AbstractDomain
     @variant == :val
   end
 
-  def <=(rhs)
-    raise AbsyntheError, "Unexpected type error" if rhs.class != self.class
-    lhs = self
-    return true if rhs.top?
-    return true if lhs.bot?
-
-    return lhs.attrs[:suffix].end_with?(rhs.attrs[:suffix]) if (lhs.val? && rhs.val?)
-
-    if lhs.var? && rhs.var?
-      if lhs.attrs[:name] == rhs.attrs[:name]
-        return leq_nil(lhs.attrs[:length], rhs.attrs[:length])
-      else
-        return false
-      end
-    end
-
-    return false if lhs.top?
-    return false if rhs.bot?
-
-    return false
+  def val_leq(lhs, rhs)
+    lhs.attrs[:suffix].end_with?(rhs.attrs[:suffix])
   end
+
+  def var_leq(lhs, rhs)
+    if lhs.attrs[:name] == rhs.attrs[:name]
+      return leq_nil(lhs.attrs[:length], rhs.attrs[:length])
+    else
+      return false
+    end
+  end
+
+  # def <=(rhs)
+  #   raise AbsyntheError, "Unexpected type error" if rhs.class != self.class
+  #   lhs = self
+  #   return true if rhs.top?
+  #   return true if lhs.bot?
+
+  #   return lhs.attrs[:suffix].end_with?(rhs.attrs[:suffix]) if (lhs.val? && rhs.val?)
+
+  #   if lhs.var? && rhs.var?
+  #     if lhs.attrs[:name] == rhs.attrs[:name]
+  #       return leq_nil(lhs.attrs[:length], rhs.attrs[:length])
+  #     else
+  #       return true
+  #     end
+  #   end
+
+  #   return false if lhs.top?
+  #   return false if rhs.bot?
+
+  #   return false
+  # end
 
   def ==(rhs)
     raise AbsyntheError, "Unexpected type error" if rhs.class != self.class
@@ -104,7 +121,7 @@ class StringSuffix < AbstractDomain
     elsif rhs
       true
     else
-      false
+      true
     end
   end
 end

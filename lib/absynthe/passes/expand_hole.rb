@@ -1,4 +1,6 @@
 require 'ast'
+require 'pry'
+require 'pry-byebug'
 
 class ExpandHolePass < ::AST::Processor
   attr_reader :expand_map
@@ -13,6 +15,7 @@ class ExpandHolePass < ::AST::Processor
   def on_hole(node)
     goal = node.children[1]
     rules = @lang.rules[node.children[0]]
+    interpreter = AbstractInterpreter.interpreter_from(@ctx.domain)
     expanded = rules.map { |r|
       case r
       when Terminal
@@ -20,18 +23,39 @@ class ExpandHolePass < ::AST::Processor
           if @lang.rules.key?(r.name)
             s(:hole, r.name, goal)
           else
-            s(:const, r.name)
+            prog = s(:const, r.name)
+            absval = interpreter.interpret(@ctx.init_env, prog)
+            if absval <= goal
+              prog
+            else
+              # binding.pry
+              nil
+            end
           end
         else
-          s(:const, r.name)
+          prog = s(:const, r.name)
+          absval = interpreter.interpret(@ctx.init_env, prog)
+          if absval <= goal
+            prog
+          else
+            # binding.pry
+            nil
+          end
         end
       when NonTerminal
         args = r.args.map { |n| s(:hole, n, @ctx.domain.var(fresh)) }
-        s(:send, r.name, *args)
+        prog = s(:send, r.name, *args)
+        absval = interpreter.interpret(@ctx.init_env, prog)
+        if absval <= goal
+          prog
+        else
+          # binding.pry
+          nil
+        end
       else
         raise AbsyntheError, "unexpected class #{r}"
       end
-    }
+    }.compact
 
     @expand_map << expanded.size
     s(:filled_hole, goal, *expanded)

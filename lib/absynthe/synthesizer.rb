@@ -23,8 +23,14 @@ def synthesize(ctx, spec, q)
             size = ProgSizePass.prog_size(prog)
             q.push(prog, size) if size <= ctx.max_size
           end
-        elsif spec.test_prog(prog)
-          return prog
+        else
+          # src = Sygus::unparse(prog)
+          # interpreter = AbstractInterpreter.interpreter_from(ctx.domain)
+          # absval = interpreter.interpret(ctx.init_env, prog)
+          # puts "#{src} :: #{absval}"
+          if spec.test_prog(prog)
+            return prog
+          end
         end
       }
   end

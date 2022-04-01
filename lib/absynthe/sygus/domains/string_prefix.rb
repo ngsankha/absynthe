@@ -6,19 +6,24 @@ class StringPrefix < AbstractDomain
   def initialize(variant, **attrs)
     @variant = variant
     @attrs = attrs
-    freeze
   end
 
+  @@top = new(:top)
+  @@bot = new(:bot)
+
   def self.top
-    new(:top)
+    @@top
   end
 
   def self.bot
-    new(:bot)
+    @@bot
   end
 
   def self.var(name)
-    new(:var, name: name)
+    result = new(:var, name: name)
+    result.glb = @@bot
+    result.lub = @@top
+    result
   end
 
   def self.val(prefix, const_str)
@@ -41,15 +46,13 @@ class StringPrefix < AbstractDomain
     @variant == :val
   end
 
-  def <=(rhs)
-    raise AbsyntheError, "Unexpected type error #{self.class} != #{rhs.class}" if rhs.class != self.class
-    lhs = self
-    return true if lhs.var? || rhs.var?
-    return true if rhs.top?
-    return true if lhs.bot?
-    return false if lhs.top?
-    return false if rhs.bot?
+  def val_leq(lhs, rhs)
     lhs.attrs[:prefix].start_with?(rhs.attrs[:prefix])
+  end
+
+  def var_leq(lhs, rhs)
+    # NOTE: This assumes all ground variables are distinct
+    false
   end
 
   def ==(rhs)
