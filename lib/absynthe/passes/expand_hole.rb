@@ -23,35 +23,14 @@ class ExpandHolePass < ::AST::Processor
           if @lang.rules.key?(r.name)
             s(:hole, r.name, goal)
           else
-            prog = s(:const, r.name)
-            absval = interpreter.interpret(@ctx.init_env, prog)
-            if absval <= goal
-              prog
-            else
-              # binding.pry
-              nil
-            end
+            s(:const, r.name)
           end
         else
-          prog = s(:const, r.name)
-          absval = interpreter.interpret(@ctx.init_env, prog)
-          if absval <= goal
-            prog
-          else
-            # binding.pry
-            nil
-          end
+          s(:const, r.name)
         end
       when NonTerminal
         args = r.args.map { |n| s(:hole, n, @ctx.domain.var(fresh)) }
-        prog = s(:send, r.name, *args)
-        absval = interpreter.interpret(@ctx.init_env, prog)
-        if absval <= goal
-          prog
-        else
-          # binding.pry
-          nil
-        end
+        s(:send, r.name, *args)
       else
         raise AbsyntheError, "unexpected class #{r}"
       end

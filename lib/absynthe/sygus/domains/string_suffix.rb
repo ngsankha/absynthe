@@ -102,7 +102,11 @@ class StringSuffix < AbstractDomain
     elsif bot?
       "⊥"
     elsif var?
-      "?#{@attrs[:name]}"
+      if @attrs[:length]
+        "?#{@attrs[:name]}[#{@attrs[:length]}]"
+      else
+        "?#{@attrs[:name]}"
+      end
     else
       if @attrs[:const_str]
         "\"#{@attrs[:suffix]}\""

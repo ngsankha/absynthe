@@ -1,4 +1,5 @@
 class AbstractDomain
+  extend VarName
   attr_accessor :glb, :lub
 
   def <=(rhs)
@@ -7,8 +8,11 @@ class AbstractDomain
     leq_impl(lhs, rhs)
   end
 
+  def self.fresh_var
+    self.var(fresh)
+  end
+
   def leq_impl(lhs, rhs)
-    root_vars = Globals.root_vars
     if lhs.top?
       if rhs.top?
         true
@@ -17,7 +21,7 @@ class AbstractDomain
       elsif rhs.val?
         false
       elsif rhs.var?
-        if root_vars.include? rhs
+        if Globals.root_vars_include? rhs
           false
         else
           rhs.lub = lhs
@@ -34,7 +38,7 @@ class AbstractDomain
       elsif rhs.val?
         true
       elsif rhs.var?
-        if root_vars.include? rhs
+        if Globals.root_vars_include? rhs
           true
         else
           rhs.lub = lhs
@@ -51,7 +55,7 @@ class AbstractDomain
       elsif rhs.val?
         val_leq(lhs, rhs)
       elsif rhs.var?
-        if root_vars.include? rhs
+        if Globals.root_vars_include? rhs
           false
         else
           rhs.glb = lhs
@@ -68,7 +72,7 @@ class AbstractDomain
         lhs.glb = rhs
         true
       elsif rhs.val?
-        if root_vars.include? lhs
+        if Globals.root_vars_include? lhs
           false
         else
           lhs.glb = rhs
@@ -86,19 +90,28 @@ class AbstractDomain
 
   def var_leq_update(lhs, rhs)
     root_vars = Globals.root_vars
-    if root_vars.include? lhs
-      if root_vars.include? rhs
+    if Globals.root_vars_include? lhs
+      if Globals.root_vars_include? rhs
         var_leq(lhs, rhs)
       else
         rhs.glb = lhs
         true
       end
     else
-      if root_vars.include? rhs
+      if Globals.root_vars_include? rhs
         lhs.lub = rhs
         true
       else
-        rhs.lub <= lhs.glb && lhs.lub <= rhs.glb
+        new_glb = rhs.glb
+        new_lub = rhs.lub
+        if lhs.glb <= new_glb and new_lub <= rhs.lub
+          lhs.glb = new_glb
+          lhs.lub = new_lub
+          true
+        else
+          false
+        end
+        # rhs.lub <= lhs.glb && lhs.lub <= rhs.glb
       end
     end
   end

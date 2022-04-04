@@ -17,9 +17,11 @@ def synthesize(ctx, spec, q)
           # if not satisfied by goal abstract value, program is rejected
           interpreter = AbstractInterpreter.interpreter_from(ctx.domain)
           absval = interpreter.interpret(ctx.init_env, prog)
+          # src = Sygus::unparse(prog)
+          # puts "#{src} :: #{absval}"
           if absval <= ctx.goal
-            # src = Sygus::unparse(prog)
-            # puts "#{src} :: #{absval}"
+            # puts absval <= ctx.goal
+            # puts Globals.root_vars
             size = ProgSizePass.prog_size(prog)
             q.push(prog, size) if size <= ctx.max_size
           end

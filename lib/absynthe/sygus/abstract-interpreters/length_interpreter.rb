@@ -1,6 +1,7 @@
 module Sygus
   class StringLengthInterpreter < AbstractInterpreter
     ::DOMAIN_INTERPRETER[StringLength] = self
+    extend VarName
 
     def self.domain
       StringLength
@@ -32,9 +33,13 @@ module Sygus
           elsif arg0.top? || arg1.top?
             StringLength.top
           else
-            StringLength.val(
-              arg0.attrs[:l] + arg1.attrs[:l],
-              arg0.attrs[:u] + arg1.attrs[:u])
+            if arg0.val? && arg1.val?
+              StringLength.val(
+                arg0.attrs[:l] + arg1.attrs[:l],
+                arg0.attrs[:u] + arg1.attrs[:u])
+            else
+              StringLength.var(fresh)
+            end
           end
         when :"str.replace"
           StringLength.top
