@@ -38,7 +38,7 @@ module Sygus
                 arg0.attrs[:l] + arg1.attrs[:l],
                 arg0.attrs[:u] + arg1.attrs[:u])
             else
-              StringLength.var(fresh)
+              StringLength.fresh_var
             end
           end
         when :"str.replace"
