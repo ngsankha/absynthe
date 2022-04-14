@@ -12,6 +12,7 @@ def synthesize(ctx, spec, q)
       .each { |selection|
         extract_pass = ExtractASTPass.new(selection)
         prog = extract_pass.process(expanded)
+        # TODO: solve dependent holes here, if no solution eliminates, if solution exists update with concrete hole
         num_holes = HoleCountPass.holes(prog)
         if num_holes > 0
           # if not satisfied by goal abstract value, program is rejected

@@ -46,8 +46,8 @@ class SygusTest < Minitest::Test
 
   run_sygus_test('./sygus-strings/phone-5.sl')
 
-  # run_sygus_test('./sygus-strings/phone-6.sl',
-  #   {:name => StringLength.var('name')}, StringLength.val(3, 3))
+  run_sygus_test('./sygus-strings/phone-6.sl',
+    {:name => StringLenExt.var('name')}, StringLenExt.val(Interval.new(3, 3)))
   # run_sygus_test('./sygus-strings/phone-7.sl',
   #   {:name => StringLength.var('name')}, StringLength.val(3, 3))
   # run_sygus_test('./sygus-strings/phone-8.sl',

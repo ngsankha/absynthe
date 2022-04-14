@@ -1,6 +1,6 @@
 class StringLength < AbstractDomain
   include VarName
-  attr_reader :attrs, :variant, :asserts
+  attr_reader :attrs, :variant
 
   private_class_method :new
 

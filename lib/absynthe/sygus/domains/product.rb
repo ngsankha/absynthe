@@ -9,7 +9,8 @@ class ProductDomain < AbstractDomain
   @@classes = [
     StringLength,
     StringPrefix,
-    StringSuffix
+    StringSuffix,
+    StringLenExt
   ]
 
   def initialize(variant, domains)

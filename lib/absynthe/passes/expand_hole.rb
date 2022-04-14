@@ -29,6 +29,7 @@ class ExpandHolePass < ::AST::Processor
           s(:const, r.name)
         end
       when NonTerminal
+        # TODO: create dependent holes here
         args = r.args.map { |n| s(:hole, n, @ctx.domain.fresh_var) }
         s(:send, r.name, *args)
       else
