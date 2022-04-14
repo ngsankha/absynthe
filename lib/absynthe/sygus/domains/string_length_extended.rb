@@ -115,6 +115,10 @@ class StringLenExt < AbstractDomain
     end
   end
 
+  def solve
+    raise AbsyntheError, "unimplemented!"
+  end
+
   # private
   # def self.var_leq(lhs, rhs)
   #   if lhs.attrs[:l].is_a?(Z3::Expr) ||

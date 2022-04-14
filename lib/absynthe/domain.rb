@@ -12,6 +12,10 @@ class AbstractDomain
     self.var(fresh)
   end
 
+  def solvable?
+    respond_to? :solve
+  end
+
   def leq_impl(lhs, rhs)
     if lhs.top?
       if rhs.top?

@@ -22,6 +22,10 @@ class ProductDomain < AbstractDomain
     }
   end
 
+  def solvable?
+    @domains.values.any? { |v| v.solvable? }
+  end
+
   def self.top
     new(:top, @@classes.map { |k| k.top })
   end

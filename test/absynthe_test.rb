@@ -8,6 +8,17 @@ class AbsyntheTest < Minitest::Test
     refute_nil ::Absynthe::VERSION
   end
 
+  def test_domains_solvable
+    refute StringLength.top.solvable?
+    refute StringPrefix.top.solvable?
+    refute StringSuffix.top.solvable?
+
+    assert StringLenExt.top.solvable?
+
+    refute ProductDomain.val(StringLength.top, StringPrefix.top).solvable?
+    assert ProductDomain.val(StringLenExt.top, StringPrefix.top).solvable?
+  end
+
   def test_string_prefix_domain
     top = StringPrefix.top
     bot = StringPrefix.bot
