@@ -91,4 +91,10 @@ class ProductDomain < AbstractDomain
       @domains.map { |k, v| "(#{v.to_s} :: #{k.to_s})" }.join(" x ")
     end
   end
+
+  def self.replace_dep_hole!(name, args)
+    # TODO: project args array into each base domain, apply replace_dep_hole!
+    # for each base domain and then combine these back to the product domain
+    raise AbsyntheError, "unimplemented!"
+  end
 end

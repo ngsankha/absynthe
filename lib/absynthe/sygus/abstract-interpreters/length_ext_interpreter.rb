@@ -33,11 +33,10 @@ module Sygus
           elsif arg0.top? || arg1.top?
             StringLenExt.top
           else
-            if arg0.val? && arg1.val?
-              StringLenExt.val(arg0.attrs[:val] + arg1.attrs[:val])
-            else
-              StringLenExt.fresh_var
-            end
+            res = StringLenExt.var(arg0.attrs[:val] + arg1.attrs[:val])
+            res.asserts.push(*arg0.asserts)
+            res.asserts.push(*arg1.asserts)
+            res
           end
         when :"str.replace"
           StringLenExt.top
@@ -49,11 +48,13 @@ module Sygus
           elsif arg0.top? || arg1.top?
             StringLenExt.top
           else
-            StringLenExt.val(Interval.new(0, 1))
+            res = StringLenExt.fresh_var
+            res.asserts << ((res.attrs[:val] == 0) | (res.attrs[:val] == 1))
+            res
           end
         when :"int.to.str"
           arg0 = interpret(env, node.children[1])
-          StringLenExt.from(arg0.to_s)
+          StringLenExt.top
         when :"str.substr"
           arg0 = interpret(env, node.children[1])
           arg1 = interpret(env, node.children[2])
@@ -63,39 +64,40 @@ module Sygus
           elsif arg0.top? || arg1.top? || arg2.top?
             StringLenExt.top
           else
-          end
-
-          if arg1.val? && arg2.val?
-            StringLenExt.val(Interval.new(
-              arg2.attrs[:val] - arg1.attrs[:val] + 1,
-              arg2.attrs[:val] - arg1.attrs[:val] + 1))
-          elsif arg1.var? || arg2.var?
-            StringLenExt.fresh_var
-          else
-            StringLenExt.top
+            res = StringLenExt.val(arg2.attrs[:val] - arg1.attrs[:val] + 1)
+            res.asserts.push(*arg1.asserts)
+            res.asserts.push(*arg2.asserts)
+            res
           end
         when :+
           arg0 = interpret(env, node.children[1])
           arg1 = interpret(env, node.children[2])
-          if arg0.val? && arg1.val?
-            StringLenExt.val(arg0.attrs[:val] + arg1.attrs[:val])
-          elsif arg0.var? || arg1.var?
-            StringLenExt.fresh_var
-          else
+          if arg0.top? || arg1.top?
             StringLenExt.top
+          elsif arg0.bot? || arg1.bot?
+            StringLenExt.bot
+          else
+            res = StringLenExt.val(arg0.attrs[:val] + arg1.attrs[:val])
+            res.asserts.push(*arg0.asserts)
+            res.asserts.push(*arg1.asserts)
+            res
           end
         when :-
           arg0 = interpret(env, node.children[1])
           arg1 = interpret(env, node.children[2])
-          if arg0.val? && arg1.val?
-            StringLenExt.val(arg0.attrs[:val] - arg1.attrs[:val])
-          elsif arg0.var? || arg1.var?
-            StringLenExt.fresh_var
-          else
+          if arg0.top? || arg1.top?
             StringLenExt.top
+          elsif arg0.bot? || arg1.bot?
+            StringLenExt.bot
+          else
+            res = StringLenExt.val(arg0.attrs[:val] + arg1.attrs[:val])
+            res.asserts.push(*arg0.asserts)
+            res.asserts.push(*arg1.asserts)
+            res
           end
         when :"str.len"
-          StringLenExt.top
+          arg0 = interpret(env, node.children[1])
+          arg0
         when :"str.to.int"
           StringLenExt.top
         when :"str.indexof"
@@ -111,6 +113,8 @@ module Sygus
         end
       when :hole
         eval_hole(node)
+      when :dephole
+        eval_dephole(node)
       else
         raise AbsyntheError, "unexpected AST node #{node.type}"
       end

@@ -127,4 +127,6 @@ class AbstractDomain
   def val_leq(lhs, rhs)
     raise AbsyntheError, "Unimplemented!"
   end
+
+  def self.replace_dep_hole!(name, args); end
 end

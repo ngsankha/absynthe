@@ -29,8 +29,9 @@ class ExpandHolePass < ::AST::Processor
           s(:const, r.name)
         end
       when NonTerminal
-        # TODO: create dependent holes here
         args = r.args.map { |n| s(:hole, n, @ctx.domain.fresh_var) }
+        # create dependent holes here
+        @ctx.domain.replace_dep_hole! r.name, args
         s(:send, r.name, *args)
       else
         raise AbsyntheError, "unexpected class #{r}"

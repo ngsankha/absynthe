@@ -8,6 +8,10 @@ class AbstractInterpreter
     project_domain(node.children[1], domain)
   end
 
+  def self.eval_dephole(node)
+    node.children[1]
+  end
+
   def self.domain
     raise AbsyntheError, "unimplemented!"
   end

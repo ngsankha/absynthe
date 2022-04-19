@@ -8,6 +8,15 @@ class AbsyntheTest < Minitest::Test
     refute_nil ::Absynthe::VERSION
   end
 
+  def test_eval_dephole
+    prog = s(:send, :"str.substr",
+             s(:hole, :ntString, StringLenExt.fresh_var),
+             s(:hole,    :ntInt, StringLenExt.fresh_var),
+             s(:dephole, :ntInt, StringLenExt.fresh_var))
+    res = Sygus::StringLenExtInterpreter.interpret({}, prog)
+    assert res <= StringLenExt.val(3)
+  end
+
   def test_domains_solvable
     refute StringLength.top.solvable?
     refute StringPrefix.top.solvable?
@@ -17,6 +26,24 @@ class AbsyntheTest < Minitest::Test
 
     refute ProductDomain.val(StringLength.top, StringPrefix.top).solvable?
     assert ProductDomain.val(StringLenExt.top, StringPrefix.top).solvable?
+  end
+
+  def test_str_len_ext_values
+    dom1 = StringLenExt.from("foo")
+    dom2 = StringLenExt.from("bar")
+    dom3 = StringLenExt.from("foobar")
+    dom4 = StringLenExt.from(3)
+    dom5 = StringLenExt.from(true)
+    assert_equal dom1, dom2
+    assert_equal dom1, dom4
+    assert_equal dom1.attrs[:val], 3
+    assert_equal dom2.attrs[:val], 3
+    assert_equal dom3.attrs[:val], 6
+    assert_equal dom4.attrs[:val], 3
+    assert_equal dom5.attrs[:val], true
+    assert_raises AbsyntheError do
+      StringLenExt.from(Hash.new)
+    end
   end
 
   def test_string_prefix_domain

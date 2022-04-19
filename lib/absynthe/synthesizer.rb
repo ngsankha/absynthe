@@ -12,28 +12,26 @@ def synthesize(ctx, spec, q)
       .each { |selection|
         extract_pass = ExtractASTPass.new(selection)
         prog = extract_pass.process(expanded)
-        # TODO: solve dependent holes here, if no solution eliminates, if solution exists update with concrete hole
-        num_holes = HoleCountPass.holes(prog)
-        if num_holes > 0
+        hc_pass = HoleCountPass.new
+        hc_pass.process(prog)
+        total_holes = hc_pass.num_holes + hc_pass.num_depholes
+        if total_holes > 0
           # if not satisfied by goal abstract value, program is rejected
           interpreter = AbstractInterpreter.interpreter_from(ctx.domain)
           absval = interpreter.interpret(ctx.init_env, prog)
           # src = Sygus::unparse(prog)
           # puts "#{src} :: #{absval}"
+
+          # TODO: solve dependent holes at <=, model gives value to remaining hole
           if absval <= ctx.goal
-            # puts absval <= ctx.goal
-            # puts Globals.root_vars
+            if hc_pass.num_holes == 0
+              puts "concretize dephole"
+            end
             size = ProgSizePass.prog_size(prog)
             q.push(prog, size) if size <= ctx.max_size
           end
-        else
-          # src = Sygus::unparse(prog)
-          # interpreter = AbstractInterpreter.interpreter_from(ctx.domain)
-          # absval = interpreter.interpret(ctx.init_env, prog)
-          # puts "#{src} :: #{absval}"
-          if spec.test_prog(prog)
-            return prog
-          end
+        elsif spec.test_prog(prog)
+          return prog
         end
       }
   end

@@ -1,37 +1,49 @@
-class Interval
-  attr_accessor :l, :u
+require 'lazyz3'
+Integer.prepend LazyZ3::Int
+TrueClass.prepend LazyZ3::Bool
+FalseClass.prepend LazyZ3::Bool
 
-  def initialize(l, u)
-    raise AbsyntheError, "#{l} should be less than or equal to #{u}" unless l <= u
-    @l = l
-    @u = u
-  end
+# class Interval
+#   attr_accessor :l, :u
 
-  def ==(rhs)
-    @l == rhs.l && @u == rhs.u
-  end
+#   def initialize(l, u)
+#     raise AbsyntheError, "#{l} should be less than or equal to #{u}" unless l <= u
+#     @l = l
+#     @u = u
+#   end
 
-  def <=(rhs)
-    rhs.l <= @l && @u <= rhs.u
-  end
+#   def ==(rhs)
+#     @l == rhs.l && @u == rhs.u
+#   end
 
-  def +(rhs)
-    Interval.new(@l + rhs.l, @u + rhs.u)
-  end
+#   def <=(rhs)
+#     rhs.l <= @l && @u <= rhs.u
+#   end
 
-  def -(rhs)
-    Interval.new(@l - rhs.l, @u - rhs.u)
-  end
-end
+#   def +(rhs)
+#     Interval.new(@l + rhs.l, @u + rhs.u)
+#   end
 
+#   def -(rhs)
+#     Interval.new(@l - rhs.l, @u - rhs.u)
+#   end
+
+#   def to_s
+#     "[#{@l}, #{@u}]"
+#   end
+# end
+
+# TODO: there is no way to distinguish strings and integers when lifted to
+# this domain. Is that fine?
 class StringLenExt < AbstractDomain
-  attr_reader :attrs, :variant
+  attr_reader :attrs, :variant, :asserts
 
   private_class_method :new
 
   def initialize(variant, **attrs)
     @variant = variant
     @attrs = attrs
+    @asserts = []
   end
 
   @@top = new(:top)
@@ -46,14 +58,11 @@ class StringLenExt < AbstractDomain
   end
 
   def self.var(name)
-    result = new(:var, name: name)
-    result.glb = @@bot
-    result.lub = @@top
-    result
+    var_val_impl(name)
   end
 
   def self.val(v)
-    new(:val, val: v)
+    var_val_impl(v)
   end
 
   def top?
@@ -65,26 +74,19 @@ class StringLenExt < AbstractDomain
   end
 
   def var?
-    @variant == :var
+    false
   end
 
   def val?
-    @variant == :val
+    true
   end
 
   def val_leq(lhs, rhs)
-    if lhs.attrs[:val].is_a?(Interval) && rhs.attrs[:val].is_a?(Interval)
-      # abstract value for string
-      lhs.attrs[:val] <= rhs.attrs[:val]
-    else
-      # concrete values
-      lhs.attrs[:val] == rhs.attrs[:val]
-    end
+    concrete_leq(lhs, rhs)
   end
 
   def var_leq(lhs, rhs)
-    # NOTE: This assumes all ground variables are distinct
-    false
+    concrete_leq(lhs, rhs)
   end
 
   def ==(rhs)
@@ -95,7 +97,7 @@ class StringLenExt < AbstractDomain
   def self.from(val)
     case val
     when String
-      StringLenExt.val(Interval.new(val.length, val.length))
+      StringLenExt.val(val.length)
     when Integer, true, false
       StringLenExt.val(val)
     else
@@ -111,7 +113,7 @@ class StringLenExt < AbstractDomain
     elsif var?
       "?#{@attrs[:name]}"
     else
-      "[#{@attrs[:l]}, #{@attrs[:u]}]"
+      "#{@attrs[:val]}"
     end
   end
 
@@ -119,7 +121,83 @@ class StringLenExt < AbstractDomain
     raise AbsyntheError, "unimplemented!"
   end
 
-  # private
+  def self.replace_dep_hole!(name, args)
+    case name
+    when :"str.++"
+      args[1] = s(:dephole, :ntString, self.fresh_var)
+    when :"str.replace"
+      return
+    when :"str.at"
+      return
+    when :"int.to.str"
+      return
+    when :"str.substr"
+      args[2] = s(:dephole, :ntInt, self.fresh_var)
+    when :+
+      args[1] = s(:dephole, :ntInt, self.fresh_var)
+    when :-
+      args[1] = s(:dephole, :ntInt, self.fresh_var)
+    when :"str.len"
+      args[0] = s(:dephole, :ntString, self.fresh_var)
+    when :"str.to.int"
+      return
+    when :"str.indexof"
+      return
+    when :"str.prefixof"
+      return
+    when :"str.suffixof"
+      return
+    when :"str.contains"
+      return
+    else
+    end
+  end
+
+  private
+  def self.var_val_impl(v)
+    case v
+    when String
+      z3val = LazyZ3::var_int(v)
+      res = new(:val, val: z3val)
+      res.asserts << (z3val >= 0)
+      res
+    when LazyZ3::Z3Node, Integer, true, false
+      new(:val, val: v)
+    else
+      raise AbsyntheError, "unexpected type"
+    end
+  end
+
+  def val_z3?
+    @attrs[:val].is_a?(LazyZ3::Z3Node)
+  end
+
+  def combine_asserts(lhs, rhs)
+    all_asserts = lhs.asserts + rhs.asserts
+    base = (lhs.attrs[:val] == rhs.attrs[:val])
+    if all_asserts.empty?
+      puts "WARNING: No assumptions, is this correct?"
+      base
+    else
+      all_asserts.reduce(:&) & base
+    end
+  end
+
+  def concrete_leq(lhs, rhs)
+    if lhs.attrs[:val].is_a?(LazyZ3::Z3Node) ||
+       rhs.attrs[:val].is_a?(LazyZ3::Z3Node)
+      expr = combine_asserts(lhs, rhs)
+      e = LazyZ3::Evaluator.new
+      result = e.solve(expr)
+      # if result
+      #   puts e.model
+      # end
+      result
+    else
+      lhs.attrs[:val] == rhs.attrs[:val]
+    end
+  end
+
   # def self.var_leq(lhs, rhs)
   #   if lhs.attrs[:l].is_a?(Z3::Expr) ||
   #      lhs.attrs[:u].is_a?(Z3::Expr) ||

@@ -104,6 +104,9 @@ module Sygus
     when :hole
       # "(□: #{node.children[1]})"
       "□"
+    when :dephole
+      # "(□: #{node.children[1]})"
+      "□"
     else
       raise AbsyntheError, "unexpected AST node #{node.type}"
     end
