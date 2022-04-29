@@ -149,4 +149,176 @@ class AbsyntheTest < Minitest::Test
     res = Sygus::PrefixInterpreter.interpret({:name => "Sankha Guria"}, prog)
     assert res <= StringPrefix.val("Dr. ", true)
   end
+
+  def test_phone_3
+    prog = s(:send, :"str.++",
+              s(:send, :"str.++",
+                s(:send, :"str.++",
+                  s(:const, "("),
+                  s(:send, :"str.++",
+                    s(:send, :"str.substr",
+                      s(:const, :name),
+                      s(:const, 0),
+                      s(:const, 3)),
+                    s(:const, ")"))),
+                s(:const, " ")),
+              s(:send, :"str.substr",
+                s(:const, :name),
+                s(:const, 4),
+                s(:send, :"str.len",
+                  s(:const, :name))))
+    # (str.++ (str.++ (str.++ "(" (str.++ (str.substr name 0 3) ")")) " ") (str.substr name 4 (str.len name)))
+    res = Sygus::interpret({:name => "938-242-504"}, prog)
+    assert_equal res, "(938) 242-504"
+  end
+
+  def test_phone_4
+    prog = s(:send, :"str.replace",
+            s(:const, :name),
+            s(:const, "-"),
+            s(:const, "."))
+    # (str.replace name "-" ".")
+    res = Sygus::interpret({:name => "938-242-504"}, prog)
+    assert_equal res, "938.242.504"
+  end
+
+  def test_phone_5
+    prog = s(:send, :"str.substr",
+            s(:const, :name),
+            s(:const, 1),
+            s(:send, :"str.indexof",
+              s(:const, :name),
+              s(:const, " "),
+              s(:const, 0)))
+    # (str.substr name 1 (str.indexof name " " 0))
+    res = Sygus::interpret({:name => "+106 769-858-438"}, prog)
+    assert_equal res, "106"
+  end
+
+  def test_phone_6
+    prog = s(:send, :"str.substr",
+            s(:const, :name),
+            s(:send, :+,
+                s(:const, 1),
+                s(:send, :"str.indexof",
+                  s(:const, :name),
+                  s(:const, " "),
+                  s(:const, 0))),
+            s(:send, :+,
+                s(:const, 4),
+                s(:send, :"str.indexof",
+                  s(:const, :name),
+                  s(:const, " "),
+                  s(:const, 0))))
+    # (str.substr name (+ 1 (str.indexof name " " 0)) (+ 4 (str.indexof name " " 0)))
+    res = Sygus::interpret({:name => "+106 769-858-438"}, prog)
+    assert_equal res, "769"
+    # res = Sygus::StringLenExtInterpreter.interpret({:name => StringLenExt.top}, prog)
+    # assert_equal res, StringLenExt.val(3)
+  end
+
+  def test_phone_7
+    prog = s(:send, :"str.substr",
+            s(:const, :name),
+            s(:send, :+,
+              s(:send, :"str.indexof",
+                s(:const, :name),
+                s(:const, "-"),
+                s(:const, 0)),
+              s(:const, 1)),
+            s(:send, :+,
+              s(:send, :"str.indexof",
+                s(:const, :name),
+                s(:const, "-"),
+                s(:const, 0)),
+              s(:const, 4)))
+    # (str.substr name (+ (str.indexof name "-" 0) 1) (+ (str.indexof name "-" 0) 4))
+    res = Sygus::interpret({:name => "+106 769-858-438"}, prog)
+    assert_equal res, "858"
+  end
+
+  def test_phone_8
+    prog = s(:send, :"str.substr",
+            s(:const, :name),
+            s(:send, :-,
+              s(:send, :"str.len",
+                s(:const, :name)),
+              s(:const, 3)),
+            s(:send, :"str.len",
+              s(:const, :name)))
+    # (str.substr name (- (str.len name) 3) (str.len name))
+    res = Sygus::interpret({:name => "+106 769-858-438"}, prog)
+    assert_equal res, "438"
+  end
+
+  def test_phone_9
+    prog = s(:send, :"str.substr",
+            s(:send, :"str.replace",
+              s(:send, :"str.replace",
+                s(:const, :name),
+                s(:const, " "),
+                s(:const, ".")),
+              s(:const, "-"),
+              s(:const, ".")),
+            s(:const, 1),
+            s(:send, :"str.len",
+              s(:const, :name)))
+    # (str.substr (str.replace (str.replace name " " ".") "-" ".") 1 (str.len name))
+    res = Sygus::interpret({:name => "+106 769-858-438"}, prog)
+    assert_equal res, "106.769.858.438"
+  end
+
+  def test_phone_10
+    frag1 = s(:send, :"str.++",
+              s(:send, :"str.++",
+                s(:const, "("),
+                s(:send, :"str.substr",
+                  s(:const, :name),
+                  s(:send, :+,
+                    s(:send, :"str.indexof",
+                      s(:const, :name),
+                      s(:const, " "),
+                      s(:const, 0)),
+                    s(:const, 1)),
+                  s(:send, :+,
+                    s(:send, :"str.indexof",
+                      s(:const, :name),
+                      s(:const, " "),
+                      s(:const, 0)),
+                    s(:const, 4)))),
+              s(:const, ")"))
+
+    frag2 = s(:send, :"str.substr",
+              s(:const, :name),
+              s(:const, 0),
+              s(:send, :"str.indexof",
+                s(:const, :name),
+                s(:const, " "),
+                s(:const, 0)))
+
+    frag3 = s(:send, :"str.substr",
+              s(:const, :name),
+              s(:send, :-,
+                s(:send, :"str.len",
+                  s(:const, :name)),
+                s(:send, :+,
+                  s(:const, 3),
+                  s(:const, 4))),
+              s(:send, :"str.len",
+                s(:const, :name)))
+
+    prog = s(:send, :"str.++",
+              frag2,
+              s(:send, :"str.++",
+                s(:const, " "),
+                s(:send, :"str.++",
+                  frag1,
+                  s(:send, :"str.++",
+                    s(:const, " "),
+                    frag3))))
+
+    # (str.++ (str.substr name 0 (str.indexof name " " 0)) (str.++ " " (str.++ (str.++ (str.++ "(" (str.substr name (+ (str.indexof name " " 0) 1) (+ (str.indexof name " " 0) 4))) ")") (str.++ " " (str.substr name (- (str.len name) (+ 3 4)) (str.len name))))))
+    res = Sygus::interpret({:name => "+106 769-858-438"}, prog)
+    assert_equal res, "+106 (769) 858-438"
+  end
 end
