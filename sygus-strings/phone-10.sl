@@ -1,5 +1,5 @@
 (set-logic SLIA)
- 
+
 (synth-fun f ((name String)) String
     ((Start String (ntString))
      (ntString String (name " " "+" "-" "." "(" ")"

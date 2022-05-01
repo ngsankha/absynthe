@@ -39,19 +39,18 @@ class SygusTest < Minitest::Test
   # run_sygus_test('./sygus-strings/phone-10.sl')
   run_sygus_test('./sygus-strings/phone-2.sl')
   # run_sygus_test('./sygus-strings/phone-3.sl',
-  #   {:name => ProductDomain.val(StringPrefix.top, StringLength.val(11, 11)) },
-  #             ProductDomain.val(StringPrefix.val("(", false), StringLength.val(13, 13)))
+  #   {:name => StringLenExt.val(11)}, StringLenExt.val(13))
 
   run_sygus_test('./sygus-strings/phone-4.sl')
 
   run_sygus_test('./sygus-strings/phone-5.sl')
 
-  run_sygus_test('./sygus-strings/phone-6.sl',
-    {:name => StringLenExt.var('name')}, StringLenExt.val(3))
+  # run_sygus_test('./sygus-strings/phone-6.sl',
+  #   {:name => StringLenExt.top}, StringLenExt.val(3))
   # run_sygus_test('./sygus-strings/phone-7.sl',
   #   {:name => StringLength.var('name')}, StringLength.val(3, 3))
-  # run_sygus_test('./sygus-strings/phone-8.sl',
-  #   {:name => StringLength.var('name')}, StringLength.val(3, 3))
+  run_sygus_test('./sygus-strings/phone-8.sl',
+    {:name => StringLenExt.var('name')}, StringLenExt.val(3))
   # run_sygus_test('./sygus-strings/phone-9.sl',
   #   {:name => StringLength.var('name')}, StringLength.val(3, 3))
 

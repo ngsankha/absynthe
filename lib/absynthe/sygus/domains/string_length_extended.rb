@@ -164,7 +164,7 @@ class StringLenExt < AbstractDomain
     when LazyZ3::Z3Node, Integer, true, false
       new(:val, val: v)
     else
-      raise AbsyntheError, "unexpected type"
+      raise AbsyntheError, "unexpected type #{v.class}"
     end
   end
 
@@ -174,6 +174,9 @@ class StringLenExt < AbstractDomain
 
   def combine_asserts(lhs, rhs)
     all_asserts = lhs.asserts + rhs.asserts
+    all_asserts.reject! { |a| a.is_a?(TrueClass) }
+    return false if all_asserts.any? { |a| a.is_a?(FalseClass) }
+
     base = (lhs.attrs[:val] == rhs.attrs[:val])
     if all_asserts.empty?
       puts "WARNING: No assumptions, is this correct?"
@@ -187,51 +190,16 @@ class StringLenExt < AbstractDomain
     if lhs.attrs[:val].is_a?(LazyZ3::Z3Node) ||
        rhs.attrs[:val].is_a?(LazyZ3::Z3Node)
       expr = combine_asserts(lhs, rhs)
+      return false if (expr.is_a? FalseClass)
+
       e = LazyZ3::Evaluator.new
       result = e.solve(expr)
-      # if result
-      #   puts e.model
-      # end
+      if result
+        Globals.prev_model = e.model
+      end
       result
     else
       lhs.attrs[:val] == rhs.attrs[:val]
     end
   end
-
-  # def self.var_leq(lhs, rhs)
-  #   if lhs.attrs[:l].is_a?(Z3::Expr) ||
-  #      lhs.attrs[:u].is_a?(Z3::Expr) ||
-  #      rhs.attrs[:l].is_a?(Z3::Expr) ||
-  #      rhs.attrs[:u].is_a?(Z3::Expr)
-  #     cond = (lhs.attrs[:l] <= rhs.attrs[:u]) & (rhs.attrs[:u] <= lhs.attrs[:u])
-  #     if cond.is_a?(Z3::Expr)
-  #       read, write = IO.pipe
-
-  #       pid = Process.fork do
-  #         read.close
-  #         s = Z3::Solver.new
-  #         (lhs.asserts + rhs.asserts).each { |a|
-  #           if a.is_a?(Z3::Expr)
-  #             s.assert a
-  #           elsif !a # a is false
-  #             raise AbsyntheError, "unexpected concrete value false"
-  #           end
-  #         }
-  #         s.assert cond
-  #         Marshal.dump(s.satisfiable?, write)
-  #         exit
-  #       end
-
-  #       write.close
-  #       result = read.read
-  #       Process.wait pid
-  #       read.close
-  #       Marshal.load result
-  #     else
-  #       cond
-  #     end
-  #   else
-  #     (lhs.attrs[:l] <= rhs.attrs[:u]) && (rhs.attrs[:u] <= lhs.attrs[:u])
-  #   end
-  # end
 end

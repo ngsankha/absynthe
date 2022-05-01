@@ -172,29 +172,6 @@ class AbsyntheTest < Minitest::Test
     assert_equal res, "(938) 242-504"
   end
 
-  def test_phone_4
-    prog = s(:send, :"str.replace",
-            s(:const, :name),
-            s(:const, "-"),
-            s(:const, "."))
-    # (str.replace name "-" ".")
-    res = Sygus::interpret({:name => "938-242-504"}, prog)
-    assert_equal res, "938.242.504"
-  end
-
-  def test_phone_5
-    prog = s(:send, :"str.substr",
-            s(:const, :name),
-            s(:const, 1),
-            s(:send, :"str.indexof",
-              s(:const, :name),
-              s(:const, " "),
-              s(:const, 0)))
-    # (str.substr name 1 (str.indexof name " " 0))
-    res = Sygus::interpret({:name => "+106 769-858-438"}, prog)
-    assert_equal res, "106"
-  end
-
   def test_phone_6
     prog = s(:send, :"str.substr",
             s(:const, :name),
@@ -249,6 +226,8 @@ class AbsyntheTest < Minitest::Test
     # (str.substr name (- (str.len name) 3) (str.len name))
     res = Sygus::interpret({:name => "+106 769-858-438"}, prog)
     assert_equal res, "438"
+    res = Sygus::StringLenExtInterpreter.interpret({:name => StringLenExt.var('name')}, prog)
+    assert_equal res <= StringLenExt.val(3), true
   end
 
   def test_phone_9

@@ -38,6 +38,8 @@ class ExpandHolePass < ::AST::Processor
       end
     }.compact
 
+    expanded << s(:send, :"str.len", s(:const, :name)) if node.children[0] == :ntInt
+
     @expand_map << expanded.size
     s(:filled_hole, goal, *expanded)
   end

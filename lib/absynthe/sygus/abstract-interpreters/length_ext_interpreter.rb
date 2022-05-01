@@ -48,23 +48,32 @@ module Sygus
           elsif arg0.top? || arg1.top?
             StringLenExt.top
           else
-            res = StringLenExt.fresh_var
-            res.asserts << ((res.attrs[:val] == 0) | (res.attrs[:val] == 1))
-            res
+            cond = arg0.attrs[:val] > arg1.attrs[:val]
+            if cond == true
+              StringLenExt.val(1)
+            elsif cond == false
+              StringLenExt.val(0)
+            else # LazyZ3::Z3Node
+              res = StringLenExt.fresh_var
+              res.asserts << ((res.attrs[:val] == 0) | (res.attrs[:val] == 1))
+              res
+            end
           end
         when :"int.to.str"
-          arg0 = interpret(env, node.children[1])
           StringLenExt.top
         when :"str.substr"
           arg0 = interpret(env, node.children[1])
           arg1 = interpret(env, node.children[2])
           arg2 = interpret(env, node.children[3])
-          if arg0.bot? || arg1.bot? || arg2.bot?
+          if arg1.bot? || arg2.bot?
             StringLenExt.bot
-          elsif arg0.top? || arg1.top? || arg2.top?
+          elsif arg1.top? || arg2.top?
             StringLenExt.top
           else
-            res = StringLenExt.val(arg2.attrs[:val] - arg1.attrs[:val] + 1)
+            res = StringLenExt.val(arg2.attrs[:val] - arg1.attrs[:val])
+            if !(arg0.top? || arg0.bot?)
+              res.asserts.push(arg0.attrs[:val] >= arg2.attrs[:val])
+            end
             res.asserts.push(*arg1.asserts)
             res.asserts.push(*arg2.asserts)
             res
@@ -90,13 +99,17 @@ module Sygus
           elsif arg0.bot? || arg1.bot?
             StringLenExt.bot
           else
-            res = StringLenExt.val(arg0.attrs[:val] + arg1.attrs[:val])
+            res = StringLenExt.val(arg0.attrs[:val] - arg1.attrs[:val])
             res.asserts.push(*arg0.asserts)
             res.asserts.push(*arg1.asserts)
+            res.asserts.push(res.attrs[:val] > 0)
             res
           end
         when :"str.len"
           arg0 = interpret(env, node.children[1])
+          if !(arg0.top? || arg0.bot?)
+            arg0.asserts.push(arg0.attrs[:val] > 0)
+          end
           arg0
         when :"str.to.int"
           StringLenExt.top
