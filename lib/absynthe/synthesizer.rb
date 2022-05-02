@@ -25,18 +25,16 @@ def synthesize(ctx, spec, q)
         # if not satisfied by goal abstract value, program is rejected
         interpreter = AbstractInterpreter.interpreter_from(ctx.domain)
         absval = interpreter.interpret(ctx.init_env, prog)
-        src = Sygus::unparse(prog)
-        # puts "#{src}"# :: #{absval}"
+        # src = Sygus::unparse(prog)
+        # puts "#{src} :: #{absval}"
 
-        # TODO: solve dependent holes at <=, model gives value to remaining hole
+        # solve dependent holes at <=, model gives value to remaining hole
         if absval <= ctx.goal
           if hc_pass.num_holes == 0
             dephole_replacer = ReplaceDepholePass.new(ctx, hc_pass.num_depholes)
             if hc_pass.num_depholes > 0
               prog = dephole_replacer.process(prog)
-              # puts "==> #{Sygus::unparse(prog)}"
             else
-              # puts prog
               raise AbsyntheError, "invariant of 1 dephole broken"
             end
           end
@@ -44,7 +42,6 @@ def synthesize(ctx, spec, q)
           q.push(prog, size) if size <= ctx.max_size
         end
       elsif spec.test_prog(prog)
-        puts Sygus::unparse(prog)
         return prog
       end
     }

@@ -45,14 +45,18 @@ class SygusTest < Minitest::Test
 
   run_sygus_test('./sygus-strings/phone-5.sl')
 
-  # run_sygus_test('./sygus-strings/phone-6.sl',
-  #   {:name => StringLenExt.top}, StringLenExt.val(3))
-  # run_sygus_test('./sygus-strings/phone-7.sl',
-  #   {:name => StringLength.var('name')}, StringLength.val(3, 3))
+  run_sygus_test('./sygus-strings/phone-6.sl',
+    {:name => StringLenExt.var('name')}, StringLenExt.val(3))
+  run_sygus_test('./sygus-strings/phone-7.sl',
+    {:name => StringLenExt.var('name')}, StringLenExt.val(3))
   run_sygus_test('./sygus-strings/phone-8.sl',
     {:name => StringLenExt.var('name')}, StringLenExt.val(3))
+
+  # name_var = StringLenExt.var('name')
+  # res = StringLenExt.val(name_var.attrs[:val] - 1)
+  # res.asserts.push(res.attrs[:val] > 0)
   # run_sygus_test('./sygus-strings/phone-9.sl',
-  #   {:name => StringLength.var('name')}, StringLength.val(3, 3))
+  #   {:name => name_var}, res)
 
   run_sygus_test('./sygus-strings/phone.sl')
 

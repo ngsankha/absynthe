@@ -38,7 +38,14 @@ class ExpandHolePass < ::AST::Processor
       end
     }.compact
 
-    expanded << s(:send, :"str.len", s(:const, :name)) if node.children[0] == :ntInt
+    expanded << s(:send, :"str.indexof",
+                  s(:const, :name),
+                  s(:const, " "),
+                  s(:const, 0)) if node.children[0] == :ntInt
+    expanded << s(:send, :"str.indexof",
+                  s(:const, :name),
+                  s(:const, "-"),
+                  s(:const, 0)) if node.children[0] == :ntInt
 
     @expand_map << expanded.size
     s(:filled_hole, goal, *expanded)

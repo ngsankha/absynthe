@@ -71,15 +71,15 @@ module Sygus
       when :"str.prefixof"
         arg0 = interpret(env, node.children[1])
         arg1 = interpret(env, node.children[2])
-        arg0.start_with?(arg1)
+        arg1.start_with?(arg0)
       when :"str.suffixof"
         arg0 = interpret(env, node.children[1])
         arg1 = interpret(env, node.children[2])
-        arg0.end_with?(arg1)
+        arg1.end_with?(arg0)
       when :"str.contains"
         arg0 = interpret(env, node.children[1])
         arg1 = interpret(env, node.children[2])
-        arg0.include?(arg1)
+        arg1.include?(arg0)
       else
         raise AbsyntheError, "unexpected AST node"
       end
