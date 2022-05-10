@@ -15,8 +15,7 @@ class SygusTest < Minitest::Test
   #   {:name => ProductDomain.top}, ProductDomain.val(StringSuffix.val(".", false), StringLength.val(4, 4)))
 
   # (str.substr name (str.indexof name " " 0) (str.len name))
-  # run_sygus_test('./sygus-strings/lastname.sl',
-  #   {:name => StringSuffix.var('name')}, StringSuffix.var('name', 5))
+  run_sygus_test('./sygus-strings/lastname.sl')
 
   run_sygus_test('./sygus-strings/name-combine-2.sl',
       {:firstname => StringSuffix.top,
@@ -28,10 +27,10 @@ class SygusTest < Minitest::Test
        :lastname  => StringSuffix.var('lname')}, StringSuffix.var('lname'))
 
   # (str.++ (str.++ lastname (str.++ "," (str.++ " " (str.at firstname 0)))) ".")
-  # run_sygus_test('./sygus-strings/name-combine-4.sl',
-  #     {:firstname  => ProductDomain.val(StringPrefix.top,          StringSuffix.top),
-  #      :lastname   => ProductDomain.val(StringPrefix.var('lname'), StringSuffix.top)},
-  #     ProductDomain.val(StringPrefix.var('lname'), StringSuffix.val('.', false)))
+  run_sygus_test('./sygus-strings/name-combine-4.sl',
+      {:firstname  => ProductDomain.val(StringPrefix.top,          StringSuffix.top),
+       :lastname   => ProductDomain.val(StringPrefix.var('lname'), StringSuffix.top)},
+      ProductDomain.val(StringPrefix.var('lname'), StringSuffix.val('.', false)))
 
   run_sygus_test('./sygus-strings/name-combine.sl')
   run_sygus_test('./sygus-strings/phone-1.sl')

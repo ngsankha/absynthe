@@ -15,7 +15,7 @@ module SygusTestRunner
     test_name = File.basename(src, '.sl').gsub('-', '_')
     define_method("test_#{test_name}") do
       GC.start
-      # skip unless test_name == "phone_9"
+      skip unless test_name == "name_combine_4"
 
       ast = SXP.read_file(src)
       spec = Sygus::ProblemSpec.new(ast)
@@ -29,13 +29,9 @@ module SygusTestRunner
       tinfer = TemplateInfer.new(ctx, constraints, spec.args)
       seed = tinfer.infer
       seed ||= s(:hole, :Start, ctx.goal)
-      # seed = s(:send, :"str.substr",
-      #       s(:const, :name),
-      #       s(:hole, :ntInt, ctx.domain.fresh_var),
-      #       s(:dephole, :ntInt, ctx.domain.fresh_var))
       q = FastContainers::PriorityQueue.new(:min)
       q.push(seed, ProgSizePass.prog_size(seed))
-      Timeout::timeout(5 * 60) do
+      Timeout::timeout(10 * 60) do
         prog = synthesize(ctx, spec, q)
         puts Sygus::unparse(prog)
       end
