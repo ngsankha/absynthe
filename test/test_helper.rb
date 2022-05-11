@@ -7,15 +7,16 @@ require "sxp"
 require "fc"
 require "timeout"
 
-reporters = [Minitest::Reporters::SpecReporter.new]
+require_relative "gc_hook"
+
+reporters = [Minitest::Reporters::SpecReporter.new, GCHook.new]
 Minitest::Reporters.use! reporters
 
 module SygusTestRunner
   def run_sygus_test(src, abs_env = nil, target_abs = nil)
     test_name = File.basename(src, '.sl').gsub('-', '_')
     define_method("test_#{test_name}") do
-      GC.start
-      skip unless test_name == "name_combine_4"
+      skip unless test_name == "phone_6"
 
       ast = SXP.read_file(src)
       spec = Sygus::ProblemSpec.new(ast)
