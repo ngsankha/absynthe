@@ -1,0 +1,26 @@
+#!/usr/bin/env ruby
+
+require "bundler/setup"
+require "absynthe"
+require "json"
+
+$stdout.sync = true
+
+class Protocol
+  def self.read
+    l = gets
+    return if l.nil? # process ended
+    # TODO: see if double parse can be avoided?
+    data = JSON.parse(JSON.parse(l))
+    # TODO: additional parsing
+    data
+  end
+
+  def self.write(data)
+    puts data.to_json
+  end
+end
+
+inp = Protocol.read
+raise "Unexpected" unless inp['status'] == 0
+Protocol.write({:status => 1})

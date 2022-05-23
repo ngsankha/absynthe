@@ -11,6 +11,12 @@ PATH
   remote: .
   specs:
     absynthe (0.1.0)
+      minitest
+      pandas
+      parser
+      priority_queue_cxx
+      rake
+      sxp
 
 GEM
   remote: https://rubygems.org/
@@ -30,6 +36,11 @@ GEM
       builder
       minitest (>= 5.0)
       ruby-progressbar
+    numpy (0.4.0)
+      pycall (>= 1.2.0.beta1)
+    pandas (0.3.8)
+      numpy
+      pycall (>= 1.0.0)
     parser (3.1.2.0)
       ast (~> 2.4.1)
     priority_queue_cxx (0.3.4)
@@ -39,6 +50,7 @@ GEM
     pry-byebug (3.8.0)
       byebug (~> 11.0)
       pry (~> 0.10)
+    pycall (1.4.1)
     rake (13.0.6)
     rdf (3.2.6)
       link_header (~> 0.0, >= 0.0.8)
@@ -55,14 +67,9 @@ PLATFORMS
 DEPENDENCIES
   absynthe!
   lazyz3!
-  minitest (~> 5.0)
   minitest-reporters
-  parser (~> 3.1)
-  priority_queue_cxx (~> 0.3.4)
   pry
   pry-byebug
-  rake (~> 13.0)
-  sxp (~> 1.2)
 
 BUNDLED WITH
    2.2.28

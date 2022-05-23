@@ -29,4 +29,11 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "minitest-reporters"
   spec.add_development_dependency "pry"
   spec.add_development_dependency "pry-byebug"
+
+  spec.add_dependency "rake"
+  spec.add_dependency "minitest"
+  spec.add_dependency "sxp"
+  spec.add_dependency "parser"
+  spec.add_dependency "priority_queue_cxx"
+  spec.add_dependency "pandas"
 end
