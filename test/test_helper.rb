@@ -1,5 +1,6 @@
 $LOAD_PATH.unshift File.expand_path("../lib", __dir__)
 require "absynthe"
+require "absynthe/sygus"
 
 require "minitest/autorun"
 require "minitest/reporters"
@@ -16,7 +17,7 @@ module SygusTestRunner
   def run_sygus_test(src, abs_env = nil, target_abs = nil)
     test_name = File.basename(src, '.sl').gsub('-', '_')
     define_method("test_#{test_name}") do
-      skip unless test_name == "phone_6"
+      skip unless test_name == "dr_name"
 
       ast = SXP.read_file(src)
       spec = Sygus::ProblemSpec.new(ast)
