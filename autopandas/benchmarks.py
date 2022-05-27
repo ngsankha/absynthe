@@ -6,6 +6,31 @@ import numpy as np
 class Benchmark:
     def __init__(self):
         pass
+    
+    def absynthe_input(self):
+        args = []
+        for i in self.inputs:
+            if isinstance(i, pd.DataFrame):
+                args.append('DataFrame')
+            else:
+                raise Exception("Unexpected input argument")
+        
+        if isinstance(self.output, pd.DataFrame):
+            ret = 'DataFrame'
+        else:
+            raise Exception("Unexpected output argument")
+        return {
+            'args': args,
+            'output': ret
+        }
+    
+    def test_candidate(self, prog):
+        env = {}
+        for i in range(len(self.inputs)):
+            env['arg' + str(i)] = self.inputs[i]
+        ret = eval(prog, globals(), env)
+        return ret.equals(self.output)
+
 
 # https://stackoverflow.com/questions/11881165
 class SO_11881165_depth1(Benchmark):

@@ -2,7 +2,15 @@
 
 require "bundler/setup"
 require "absynthe"
+require "absynthe/python"
 require "json"
+require "rdl"
+require "fc"
+require "pp"
+
+class DataFrame; end
+RDL.type_params :Array, [:t], :all?
+RDL.type :DataFrame, :loc_getitem, "(Array<Integer>) -> DataFrame"
 
 $stdout.sync = true
 
@@ -10,8 +18,7 @@ class Protocol
   def self.read
     l = gets
     return if l.nil? # process ended
-    # TODO: see if double parse can be avoided?
-    data = JSON.parse(JSON.parse(l))
+    data = JSON.parse(l)
     # TODO: additional parsing
     data
   end
@@ -21,6 +28,79 @@ class Protocol
   end
 end
 
-inp = Protocol.read
-raise "Unexpected" unless inp['status'] == 0
-Protocol.write({:status => 1})
+class PythonSpec
+  def test_prog(prog)
+    Protocol.write({
+      action: 'test',
+      prog: PyLang::unparse(prog)
+    })
+    handle_action(Protocol.read)
+  end
+end
+
+class PyLang
+  def self.unparse(node)
+    case node.type
+    when :const
+      konst = node.children[0]
+      case konst
+      when Integer, true, false, Symbol
+        konst.to_s
+      when String
+        konst.inspect
+      else
+        raise AbsyntheError, "unexpected constant type"
+      end
+    when :prop
+      recv = unparse(node.children[0])
+      propname = node.children[1].to_s
+      propname = "loc" if propname == "loc_getitem"
+      args = node.children[2..].map { |n| unparse(n) }.join(", ")
+      "#{recv}.#{propname}[#{args}]"
+    when :array
+      args = node.children.map { |n| unparse(n) }.join(", ")
+      "[#{args}]"
+    when :hole
+      # "(□: #{node.children[1]})"
+      "□"
+    when :dephole
+      # "(□: #{node.children[1]})"
+      "◐"
+    else
+      raise AbsyntheError, "unexpected AST node #{node.type}"
+    end
+  end
+end
+
+def syn_start(data)
+  fnty = RDL::Globals.parser.scan_str("(#{data['args'].join(', ')}) -> #{data['output']}")
+  spec = PythonSpec.new
+
+  abs_env = fnty.args.each_with_index.map { |arg, i| ["arg#{i}", PyType.val(arg)]}.to_h
+  ctx = Context.new(abs_env, PyType.val(fnty.ret))
+  ctx.lang = :py
+  ctx.domain = PyType
+  seed = s(:hole, nil, ctx.goal)
+  q = FastContainers::PriorityQueue.new(:min)
+  q.push(seed, ProgSizePass.prog_size(seed))
+  prog = synthesize(ctx, spec, q)
+  Protocol.write({
+    action: 'done',
+    prog: PyLang::unparse(prog)
+  })
+end
+
+def handle_action(data)
+  case data['action']
+  when 'start'
+    syn_start(data)
+    puts data
+  when 'test_res'
+    data['res']
+  else
+    raise AbsyntheError, "unexpected action #{data}"
+  end
+end
+
+handle_action(Protocol.read)
+# handle_action({'args': ['DataFrame'], 'output': 'DataFrame', 'action': 'start'}.transform_keys(&:to_s))

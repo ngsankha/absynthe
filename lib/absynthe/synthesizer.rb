@@ -1,6 +1,9 @@
 def synthesize(ctx, spec, q)
-  lang = spec.lang
-  constraints = spec.constraints
+  if ctx.lang == :sygus
+    lang = spec.lang
+  else
+    lang = nil
+  end
 
   until q.empty? do
     current = q.top

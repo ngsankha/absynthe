@@ -1,4 +1,11 @@
 PATH
+  remote: ../rdl
+  specs:
+    rdl (2.1.0)
+      parser (~> 2.3, >= 2.3.1.4)
+      sql-parser (~> 0.0.2)
+
+PATH
   remote: ../z3rb-lazy
   specs:
     lazyz3 (0.1.0)
@@ -41,7 +48,7 @@ GEM
     pandas (0.3.8)
       numpy
       pycall (>= 1.0.0)
-    parser (3.1.2.0)
+    parser (2.7.2.0)
       ast (~> 2.4.1)
     priority_queue_cxx (0.3.4)
     pry (0.14.1)
@@ -51,10 +58,13 @@ GEM
       byebug (~> 11.0)
       pry (~> 0.10)
     pycall (1.4.1)
+    racc (1.6.0)
     rake (13.0.6)
-    rdf (3.2.6)
+    rdf (3.2.7)
       link_header (~> 0.0, >= 0.0.8)
     ruby-progressbar (1.11.0)
+    sql-parser (0.0.2)
+      racc
     sxp (1.2.2)
       matrix
       rdf (~> 3.2)
@@ -70,6 +80,7 @@ DEPENDENCIES
   minitest-reporters
   pry
   pry-byebug
+  rdl!
 
 BUNDLED WITH
    2.2.28
