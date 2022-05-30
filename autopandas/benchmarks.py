@@ -20,8 +20,10 @@ class Benchmark:
         else:
             raise Exception("Unexpected output argument")
         return {
-            'args': args,
-            'output': ret
+            'argsty': args,
+            'outputty': ret,
+            'rownumin': self.rownumin,
+            'rownumout': self.rownumout
         }
     
     def test_candidate(self, prog):
@@ -40,6 +42,9 @@ class SO_11881165_depth1(Benchmark):
         self.output = self.inputs[0].loc[[0, 2, 4]]
         self.funcs = ['df.loc_getitem']
         self.seqs = [[0]]
+
+        self.rownumin = ["top"]
+        self.rownumout = [0, 2, 4]
 
 # https://stackoverflow.com/questions/11941492/
 # same thing

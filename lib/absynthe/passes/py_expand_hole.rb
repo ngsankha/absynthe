@@ -13,7 +13,8 @@ class ExpandHolePass < ::AST::Processor
 
   def on_hole(node)
     goal = node.children[1]
-    ty = goal.attrs[:ty]
+    ty = goal.domains[PyType].attrs[:ty]
+    rownums = goal.domains[PandasRows]
     interpreter = AbstractInterpreter.interpreter_from(@ctx.domain)
     expanded = []
 
@@ -26,10 +27,13 @@ class ExpandHolePass < ::AST::Processor
 
     # arrays
     if ty.is_a?(RDL::Type::GenericType) && ty.base == RDL::Globals.types[:array] && ty.params[0] == RDL::Globals.types[:integer]
-      expanded << s(:array, s(:const, 0),
-                            s(:const, 2),
-                            s(:const, 4))
+      if rownums.var?
+        expanded << s(:array,
+          *rownums.glb.attrs[:rownums]
+            .to_a.map { |n| s(:const, n) })
+      end
     end
+
     # props
     RDL::Globals.info.info.each { |cls, mthds|
       next if cls.to_s.include?("RDL::")
@@ -42,7 +46,12 @@ class ExpandHolePass < ::AST::Processor
         targs = tmeth.args
         next if targs.any? { |t| t.is_a? RDL::Type::BotType }
         tout = tmeth.ret
-        expanded << s(:prop, s(:hole, nil, PyType.val(trecv)), mthd, *targs.map { |t| s(:hole, nil, PyType.val(t)) })
+        expanded << s(:prop,
+                      s(:hole, nil, ProductDomain.val(PyType.val(trecv), PandasRows.fresh_var)),
+                      mthd,
+                      *targs.map { |t|
+                        s(:hole, nil, ProductDomain.val(PyType.val(t), PandasRows.fresh_var))
+                      })
       }
     }
 

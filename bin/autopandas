@@ -72,14 +72,29 @@ class PyLang
   end
 end
 
+def parse_rownum(data)
+  [data['rownumin'].map { |n|
+      if n == "top"
+        PandasRows.top
+      else
+        PandasRows.val(n)
+      end
+    },
+   PandasRows.val(data['rownumout'])]
+end
+
 def syn_start(data)
-  fnty = RDL::Globals.parser.scan_str("(#{data['args'].join(', ')}) -> #{data['output']}")
+  fnty = RDL::Globals.parser.scan_str("(#{data['argsty'].join(', ')}) -> #{data['outputty']}")
+  rownum_in, rownum_out = parse_rownum(data)
   spec = PythonSpec.new
 
-  abs_env = fnty.args.each_with_index.map { |arg, i| ["arg#{i}", PyType.val(arg)]}.to_h
-  ctx = Context.new(abs_env, PyType.val(fnty.ret))
+  tyargs = fnty.args.map { |ty| PyType.val(ty) }
+
+  abs_env = tyargs.zip(rownum_in).each_with_index.map { |arg, i| ["arg#{i}",
+    ProductDomain.val(arg[0], arg[1])]}.to_h
+  ctx = Context.new(abs_env, ProductDomain.val(PyType.val(fnty.ret), rownum_out))
   ctx.lang = :py
-  ctx.domain = PyType
+  ctx.domain = ProductDomain
   seed = s(:hole, nil, ctx.goal)
   q = FastContainers::PriorityQueue.new(:min)
   q.push(seed, ProgSizePass.prog_size(seed))
