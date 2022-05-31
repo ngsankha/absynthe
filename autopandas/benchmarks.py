@@ -3,28 +3,39 @@ from io import StringIO
 import pandas as pd
 import numpy as np
 
+class Abstraction:
+    def _infer_type(df):
+        if isinstance(df, pd.DataFrame):
+            return 'DataFrame'
+        else:
+            raise Exception("Unexpected input argument")
+
+    def types(b):
+        inp = list(map(Abstraction._infer_type, b.inputs))
+        out = Abstraction._infer_type(b.output)
+        return [inp, out]
+    
+    def rownums(b):
+        inp = list(map(lambda x: "top", b.inputs))
+        out = list(b.output.index)
+        return [inp, out]
+    
+    def all(b):
+        tyin, tyout = Abstraction.types(b)
+        rownumin, rownumout = Abstraction.rownums(b)
+        return {
+            'argsty': tyin,
+            'outputty': tyout,
+            'rownumin': rownumin,
+            'rownumout': rownumout
+        }
+
 class Benchmark:
     def __init__(self):
         pass
     
     def absynthe_input(self):
-        args = []
-        for i in self.inputs:
-            if isinstance(i, pd.DataFrame):
-                args.append('DataFrame')
-            else:
-                raise Exception("Unexpected input argument")
-        
-        if isinstance(self.output, pd.DataFrame):
-            ret = 'DataFrame'
-        else:
-            raise Exception("Unexpected output argument")
-        return {
-            'argsty': args,
-            'outputty': ret,
-            'rownumin': self.rownumin,
-            'rownumout': self.rownumout
-        }
+        return Abstraction.all(self)
     
     def test_candidate(self, prog):
         env = {}
@@ -42,9 +53,6 @@ class SO_11881165_depth1(Benchmark):
         self.output = self.inputs[0].loc[[0, 2, 4]]
         self.funcs = ['df.loc_getitem']
         self.seqs = [[0]]
-
-        self.rownumin = ["top"]
-        self.rownumout = [0, 2, 4]
 
 # https://stackoverflow.com/questions/11941492/
 # same thing
