@@ -44,8 +44,10 @@ def synthesize(ctx, spec, q)
           size = ProgSizePass.prog_size(prog)
           q.push(prog, size) if size <= ctx.max_size
         end
-      elsif spec.test_prog(prog)
-        return prog
+      else
+        # src = Sygus::unparse(prog)
+        # puts src
+        return prog if spec.test_prog(prog)
       end
     }
   end

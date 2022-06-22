@@ -1,7 +1,7 @@
 require 'ast'
 
 class HoleCountPass < ::AST::Processor
-  attr_reader :num_holes, :num_depholes
+  attr_reader :num_holes, :num_depholes, :num_var
 
   def self.total_holes(node)
     visitor = HoleCountPass.new
@@ -12,6 +12,7 @@ class HoleCountPass < ::AST::Processor
   def initialize
     @num_holes = 0
     @num_depholes = 0
+    @num_var = 0
   end
 
   def on_hole(node)
@@ -21,6 +22,11 @@ class HoleCountPass < ::AST::Processor
 
   def on_dephole(node)
     @num_depholes += 1
+    node
+  end
+
+  def on_const(node)
+    @num_var += 1 if node.children[0].is_a? Symbol
     node
   end
 
