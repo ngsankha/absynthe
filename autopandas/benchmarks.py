@@ -14,12 +14,12 @@ class Abstraction:
         inp = list(map(Abstraction._infer_type, b.inputs))
         out = Abstraction._infer_type(b.output)
         return [inp, out]
-    
+
     def rownums(b):
         inp = list(map(lambda x: "top", b.inputs))
         out = list(b.output.index)
         return [inp, out]
-    
+
     def all(b):
         tyin, tyout = Abstraction.types(b)
         rownumin, rownumout = Abstraction.rownums(b)
@@ -33,10 +33,10 @@ class Abstraction:
 class Benchmark:
     def __init__(self):
         pass
-    
+
     def absynthe_input(self):
         return Abstraction.all(self)
-    
+
     def test_candidate(self, prog):
         env = {}
         for i in range(len(self.inputs)):
@@ -475,12 +475,12 @@ class SO_53762029_depth3(Benchmark):
         super().__init__()
         data = """
 doc_created_month   doc_created_year    speciality      doc_id_count
-8                   2016                Acupuncturist   1           
-2                   2017                Acupuncturist   1           
-4                   2017                Acupuncturist   1           
-4                   2017                Allergist       1           
-5                   2018                Allergist       1           
-10                  2018                Allergist       2   
+8                   2016                Acupuncturist   1
+2                   2017                Acupuncturist   1
+4                   2017                Acupuncturist   1
+4                   2017                Allergist       1
+5                   2018                Allergist       1
+10                  2018                Allergist       2
 """
 
         df = pd.read_csv(StringIO(data), sep='\s+')

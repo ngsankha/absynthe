@@ -9,7 +9,7 @@ class Action:
 class Protocol:
   def __init__(self, proc):
     self.proc = proc
-  
+
   def read(self):
     while True:
       line = self.proc.stdout.readline()
@@ -22,7 +22,7 @@ class Protocol:
         return data
       except ValueError:
         print("ABSYNTHE LOG: {}".format(line.decode("UTF-8").strip()))
-  
+
   def write(self, data):
     txt = json.dumps(data)
     self.proc.stdin.write((txt + "\n").encode("UTF-8"))
