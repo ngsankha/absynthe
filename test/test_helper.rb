@@ -19,7 +19,7 @@ module SygusTestRunner
   def run_sygus_test(src, abs_env = nil, target_abs = nil)
     test_name = File.basename(src, '.sl').gsub('-', '_')
     define_method("test_#{test_name}") do
-      skip unless test_name == "bikes"
+      # skip unless test_name == "dr_name"
 
       ast = SXP.read_file(src)
       spec = Sygus::ProblemSpec.new(ast)
@@ -32,7 +32,7 @@ module SygusTestRunner
       ctx = Context.new(abs_env, target_abs)
       Globals.root_vars = ctx.init_env.values.filter { |v| v.var? }
 
-      # ctx.cache = Cache.populate_sygus(ctx, lang)
+      ctx.cache = Cache.populate_sygus(ctx, lang)
 
       tinfer = TemplateInfer.new(ctx, constraints, spec.args)
       seed = tinfer.infer
