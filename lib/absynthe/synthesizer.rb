@@ -47,7 +47,11 @@ def synthesize(ctx, spec, q)
       else
         # src = Sygus::unparse(prog)
         # puts src
-        return prog if spec.test_prog(prog)
+        if spec.test_prog(prog)
+          return prog
+        else
+          Instrumentation.tested_progs += 1
+        end
       end
     }
   end

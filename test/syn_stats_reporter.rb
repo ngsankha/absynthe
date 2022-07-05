@@ -21,7 +21,8 @@ class SynthesisStatsReporter < Minitest::StatisticsReporter
       time: result.time,
       size: Instrumentation.size,
       specs: Instrumentation.examples,
-      gc_time: Instrumentation.gc_time
+      gc_time: Instrumentation.gc_time,
+      tested_progs: Instrumentation.tested_progs
     }
   end
 
