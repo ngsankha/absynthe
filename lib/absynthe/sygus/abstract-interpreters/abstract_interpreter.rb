@@ -19,6 +19,7 @@ class AbstractInterpreter
   private
   def self.project_domain(src, target)
     raise AbsyntheError, "no target domain specified" if target.nil?
-    src.domains[target]
+    return src.domains[target] if src.domains.key? target
+    target.top
   end
 end
