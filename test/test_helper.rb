@@ -17,7 +17,7 @@ module SygusTestRunner
   def run_sygus_test(src, abs_env = nil, target_abs = nil)
     test_name = File.basename(src, '.sl').gsub('-', '_')
     define_method("test_#{test_name}") do
-      skip unless test_name == "dr_name"
+      skip unless test_name == "test"
 
       ast = SXP.read_file(src)
       spec = Sygus::ProblemSpec.new(ast)

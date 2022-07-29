@@ -73,7 +73,7 @@ class PandasRows < AbstractDomain
     elsif var?
       "?#{@attrs[:name]}"
     else
-      @attrs[:rownums]
+      @attrs[:rownums].to_a.to_s
     end
   end
 

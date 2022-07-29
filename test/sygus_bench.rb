@@ -5,6 +5,10 @@ require "test_helper"
 class SygusTest < Minitest::Test
   extend SygusTestRunner
 
+  # Experiment
+  # run_sygus_test('./test.sl',
+  #   {:name => StringLenExt.var('name')}, StringLenExt.val(3))
+
   run_sygus_test('./sygus-strings/bikes.sl')
   run_sygus_test('./sygus-strings/dr-name.sl',
     {:name => StringPrefix.top}, StringPrefix.val("Dr. ", false))

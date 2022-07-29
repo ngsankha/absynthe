@@ -39,6 +39,7 @@ class ExpandHolePass < ::AST::Processor
       next if cls.to_s.include?("RDL::")
       mthds.delete(:__getobj__)
       mthds.each { |mthd, info|
+        next unless mthd.to_s.end_with? "_getitem"
         trecv = RDL::Type::NominalType.new(cls)
         # TODO: using only first defn here
         tmeth = info[:type][0]
@@ -56,6 +57,36 @@ class ExpandHolePass < ::AST::Processor
     }
 
     # funcs
+    RDL::Globals.info.info.each { |cls, mthds|
+      next if cls.to_s.include?("RDL::")
+      mthds.delete(:__getobj__)
+      mthds.each { |mthd, info|
+        next if mthd.to_s.end_with? "_getitem"
+        trecv = RDL::Type::NominalType.new(cls)
+        # TODO: using only first defn here
+        tmeth = info[:type][0]
+        # puts tmeth.inspect
+        # TODO: comptypes not supported yet. See TypeOperations module in RbSyn for impl
+        targs = tmeth.args
+        arg_terms = targs.map { |arg|
+          if arg.is_a? RDL::Type::NominalType
+            s(:hole, nil, ProductDomain.val(PyType.val(arg), PandasRows.fresh_var))
+          elsif arg.is_a? RDL::Type::FiniteHashType
+            s(:hash, *arg.elts.map { |k, v|
+              s(:key, k, s(:hole, nil, ProductDomain.val(PyType.val(v), PandasRows.fresh_var)))
+              })
+          else
+            raise AbsyntheError, "unexpected type"
+          end
+        }
+        next if targs.any? { |t| t.is_a? RDL::Type::BotType }
+        tout = tmeth.ret
+        expanded << s(:send,
+                      s(:hole, nil, ProductDomain.val(PyType.val(trecv), PandasRows.fresh_var)),
+                      mthd,
+                      *arg_terms)
+      }
+    }
 
     @expand_map << expanded.size
     s(:filled_hole, goal, *expanded)
