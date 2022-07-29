@@ -11,6 +11,7 @@ require "pp"
 class DataFrame; end
 RDL.type_params :Array, [:t], :all?
 RDL.type :DataFrame, :loc_getitem, "(Array<Integer>) -> DataFrame"
+RDL.type :DataFrame, :xs, "(String, level: 0 or 1) -> DataFrame"
 
 $stdout.sync = true
 

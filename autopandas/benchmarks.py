@@ -2,6 +2,13 @@ from io import StringIO
 
 import pandas as pd
 import numpy as np
+import itertools
+
+def flatten(xs):
+    try:
+        return list(itertools.chain(*xs))
+    except:
+        return xs
 
 class Abstraction:
     def _infer_type(df):
@@ -9,6 +16,10 @@ class Abstraction:
             return 'DataFrame'
         else:
             raise Exception("Unexpected input argument")
+    
+    def _infer_rownum(df):
+        # return list(df.index)
+        return list(set(flatten(list(df.index))))
 
     def types(b):
         inp = list(map(Abstraction._infer_type, b.inputs))
@@ -16,8 +27,8 @@ class Abstraction:
         return [inp, out]
 
     def rownums(b):
-        inp = list(map(lambda x: "top", b.inputs))
-        out = list(b.output.index)
+        inp = list(map(Abstraction._infer_rownum, b.inputs))
+        out = Abstraction._infer_rownum(b.output)
         return [inp, out]
 
     def all(b):
@@ -41,7 +52,11 @@ class Benchmark:
         env = {}
         for i in range(len(self.inputs)):
             env['arg' + str(i)] = self.inputs[i]
-        ret = eval(prog, globals(), env)
+        try:
+            ret = eval(prog, globals(), env)
+        except:
+            print("Eval error: {}".format(prog))
+            return False
         return ret.equals(self.output)
 
 

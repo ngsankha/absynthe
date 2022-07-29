@@ -1,15 +1,16 @@
 import io
 import subprocess
 import json
-from benchmarks import Benchmark, SO_11881165_depth1
+import benchmarks
 
 class Action:
   pass
 
 class Protocol:
-  def __init__(self, proc):
+  def __init__(self, proc, log=True):
     self.proc = proc
-
+    self.log = log
+  
   def read(self):
     while True:
       line = self.proc.stdout.readline()
@@ -21,8 +22,9 @@ class Protocol:
         # TODO: additional parsing
         return data
       except ValueError:
-        print("ABSYNTHE LOG: {}".format(line.decode("UTF-8").strip()))
-
+        if self.log:
+          print("ABSYNTHE LOG: {}".format(line.decode("UTF-8").strip()))
+  
   def write(self, data):
     txt = json.dumps(data)
     self.proc.stdin.write((txt + "\n").encode("UTF-8"))
@@ -40,24 +42,21 @@ def handle_action(protocol, bench):
     else:
       raise Exception("Unexpected RPC message")
 
-# for cls in Benchmark.__subclasses__():
-#     obj = cls()
-#     print(obj.output)
-#     print('======')
+benches = [
+  # benchmarks.SO_11881165_depth1(),
+  benchmarks.SO_11941492_depth1()
+]
 
-proc = subprocess.Popen(['bundle', 'exec', 'bin/autopandas'], stdout=subprocess.PIPE, stdin=subprocess.PIPE, cwd=r'..')
-p = Protocol(proc)
-# p.write('{"status": "hello"}')
-# data = p.read()
-# print(data)
-
-bench = SO_11881165_depth1()
-# print(bench.absynthe_input())
-data = bench.absynthe_input()
-data['action'] = 'start'
-# print(data)
-p.write(data)
-print(handle_action(p, bench))
-
-# print(bench.test_candidate('arg0.loc[[0, 2, 4]]'))
-# print(bench.test_candidate('arg0.loc[[0, 2]]'))
+for bench in benches:
+  print("Benchmark: {}".format(type(bench).__name__))
+  proc = subprocess.Popen(['bundle', 'exec', 'bin/autopandas'],
+                          stdout=subprocess.PIPE,
+                          stdin=subprocess.PIPE,
+                          stderr=subprocess.PIPE,
+                          cwd=r'..')
+  p = Protocol(proc, log=True)
+  data = bench.absynthe_input()
+  data['action'] = 'start'
+  p.write(data)
+  print(handle_action(p, bench))
+  print("========================")
