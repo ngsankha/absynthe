@@ -40,7 +40,7 @@ class PythonSpec
 end
 
 class PyLang
-  def self.unparse(node)
+  def self.unparse(node, in_arg: false)
     case node.type
     when :const
       konst = node.children[0]
@@ -58,6 +58,17 @@ class PyLang
       propname = "loc" if propname == "loc_getitem"
       args = node.children[2..].map { |n| unparse(n) }.join(", ")
       "#{recv}.#{propname}[#{args}]"
+    when :send
+      recv = unparse(node.children[0])
+      methd_name = node.children[1].to_s
+      args = node.children[2..].map { |n| unparse(n, in_arg: true) }.join(", ")
+      "#{recv}.#{methd_name}(#{args})"
+    when :key
+      val = unparse(node.children[1])
+      "#{node.children[0]}=#{val}"
+    when :hash
+      raise AbsyntheError, "only expected in_arg" unless in_arg
+      node.children.map { |kv| unparse(kv) }. join(", ")
     when :array
       args = node.children.map { |n| unparse(n) }.join(", ")
       "[#{args}]"
@@ -91,11 +102,14 @@ def syn_start(data)
 
   tyargs = fnty.args.map { |ty| PyType.val(ty) }
 
-  abs_env = tyargs.zip(rownum_in).each_with_index.map { |arg, i| ["arg#{i}",
-    ProductDomain.val(arg[0], arg[1])]}.to_h
-  ctx = Context.new(abs_env, ProductDomain.val(PyType.val(fnty.ret), rownum_out))
+  # abs_env = tyargs.zip(rownum_in).each_with_index.map { |arg, i| ["arg#{i}".to_sym,
+  #   ProductDomain.val(arg[0], arg[1])]}.to_h
+  abs_env = tyargs.zip(rownum_in).each_with_index.map { |arg, i| ["arg#{i}".to_sym, arg[0]]}.to_h
+  # ctx = Context.new(abs_env, ProductDomain.val(PyType.val(fnty.ret), rownum_out))
+  ctx = Context.new(abs_env, PyType.val(fnty.ret))
   ctx.lang = :py
-  ctx.domain = ProductDomain
+  # ctx.domain = ProductDomain
+  ctx.domain = PyType
   seed = s(:hole, nil, ctx.goal)
   q = FastContainers::PriorityQueue.new(:min)
   q.push(seed, ProgSizePass.prog_size(seed))
@@ -118,5 +132,6 @@ def handle_action(data)
   end
 end
 
+Instrumentation.reset!
 handle_action(Protocol.read)
 # handle_action({'args': ['DataFrame'], 'output': 'DataFrame', 'action': 'start'}.transform_keys(&:to_s))

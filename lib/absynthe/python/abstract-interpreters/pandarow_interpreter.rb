@@ -41,7 +41,6 @@ module Python
         recv = interpret(env, node.children[0])
         meth = node.children[1]
         arg  = interpret(env, node.children[2])
-        puts arg.inspect
         case meth
         when :xs
           return PandasRows.top if arg.top?

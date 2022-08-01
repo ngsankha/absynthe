@@ -13,12 +13,26 @@ class ExpandHolePass < ::AST::Processor
 
   def on_hole(node)
     goal = node.children[1]
-    ty = goal.domains[PyType].attrs[:ty]
-    rownums = goal.domains[PandasRows]
+    if goal.is_a? ProductDomain
+      ty = goal.domains[PyType].attrs[:ty]
+    elsif goal.is_a? PyType
+      ty = goal.attrs[:ty]
+    else
+      raise AbsyntheError, "unexpected!"
+    end
+    # rownums = goal.domains[PandasRows]
     interpreter = AbstractInterpreter.interpreter_from(@ctx.domain)
     expanded = []
 
     # consts
+    # TODO: fix constants
+    if RDL::Globals.types[:string] <= ty
+      expanded << s(:const, 'a')
+    elsif RDL::Type::SingletonType.new(0) <= ty
+      expanded << s(:const, 0)
+    elsif RDL::Type::SingletonType.new(1) <= ty
+      expanded << s(:const, 1)
+    end
 
     # vars
     @ctx.init_env.each { |name, val|
@@ -26,12 +40,15 @@ class ExpandHolePass < ::AST::Processor
     }
 
     # arrays
+    # if ty.is_a?(RDL::Type::GenericType) && ty.base == RDL::Globals.types[:array] && ty.params[0] == RDL::Globals.types[:integer]
+    #   if rownums.var?
+    #     expanded << s(:array,
+    #       *rownums.glb.attrs[:rownums]
+    #         .to_a.map { |n| s(:const, n) })
+    #   end
+    # end
     if ty.is_a?(RDL::Type::GenericType) && ty.base == RDL::Globals.types[:array] && ty.params[0] == RDL::Globals.types[:integer]
-      if rownums.var?
-        expanded << s(:array,
-          *rownums.glb.attrs[:rownums]
-            .to_a.map { |n| s(:const, n) })
-      end
+      expanded << s(:array, *[0, 2, 4].map { |n| s(:const, n) })
     end
 
     # props
@@ -43,15 +60,23 @@ class ExpandHolePass < ::AST::Processor
         trecv = RDL::Type::NominalType.new(cls)
         # TODO: using only first defn here
         tmeth = info[:type][0]
+        next unless tmeth.ret <= ty
         # TODO: comptypes not supported yet. See TypeOperations module in RbSyn for impl
         targs = tmeth.args
         next if targs.any? { |t| t.is_a? RDL::Type::BotType }
         tout = tmeth.ret
+        # expanded << s(:prop,
+        #               s(:hole, nil, ProductDomain.val(PyType.val(trecv), PandasRows.fresh_var)),
+        #               mthd,
+        #               *targs.map { |t|
+        #                 s(:hole, nil, ProductDomain.val(PyType.val(t), PandasRows.fresh_var))
+        #               })
+
         expanded << s(:prop,
-                      s(:hole, nil, ProductDomain.val(PyType.val(trecv), PandasRows.fresh_var)),
+                      s(:hole, nil, PyType.val(trecv)),
                       mthd,
                       *targs.map { |t|
-                        s(:hole, nil, ProductDomain.val(PyType.val(t), PandasRows.fresh_var))
+                        s(:hole, nil, PyType.val(t))
                       })
       }
     }
@@ -65,15 +90,21 @@ class ExpandHolePass < ::AST::Processor
         trecv = RDL::Type::NominalType.new(cls)
         # TODO: using only first defn here
         tmeth = info[:type][0]
+        next unless tmeth.ret <= ty
         # puts tmeth.inspect
         # TODO: comptypes not supported yet. See TypeOperations module in RbSyn for impl
+
         targs = tmeth.args
         arg_terms = targs.map { |arg|
           if arg.is_a? RDL::Type::NominalType
-            s(:hole, nil, ProductDomain.val(PyType.val(arg), PandasRows.fresh_var))
+            # s(:hole, nil, ProductDomain.val(PyType.val(arg), PandasRows.fresh_var))
+            s(:hole, nil, PyType.val(arg))
           elsif arg.is_a? RDL::Type::FiniteHashType
+            # s(:hash, *arg.elts.map { |k, v|
+            #   s(:key, k, s(:hole, nil, ProductDomain.val(PyType.val(v), PandasRows.fresh_var)))
+            #   })
             s(:hash, *arg.elts.map { |k, v|
-              s(:key, k, s(:hole, nil, ProductDomain.val(PyType.val(v), PandasRows.fresh_var)))
+              s(:key, k, s(:hole, nil, PyType.val(v)))
               })
           else
             raise AbsyntheError, "unexpected type"
@@ -81,8 +112,12 @@ class ExpandHolePass < ::AST::Processor
         }
         next if targs.any? { |t| t.is_a? RDL::Type::BotType }
         tout = tmeth.ret
+        # expanded << s(:send,
+        #               s(:hole, nil, ProductDomain.val(PyType.val(trecv), PandasRows.fresh_var)),
+        #               mthd,
+        #               *arg_terms)
         expanded << s(:send,
-                      s(:hole, nil, ProductDomain.val(PyType.val(trecv), PandasRows.fresh_var)),
+                      s(:hole, nil, PyType.val(trecv)),
                       mthd,
                       *arg_terms)
       }

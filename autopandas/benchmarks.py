@@ -16,7 +16,7 @@ class Abstraction:
             return 'DataFrame'
         else:
             raise Exception("Unexpected input argument")
-    
+
     def _infer_rownum(df):
         # return list(df.index)
         return list(set(flatten(list(df.index))))

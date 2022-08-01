@@ -10,7 +10,7 @@ class Protocol:
   def __init__(self, proc, log=True):
     self.proc = proc
     self.log = log
-  
+
   def read(self):
     while True:
       line = self.proc.stdout.readline()
@@ -24,7 +24,7 @@ class Protocol:
       except ValueError:
         if self.log:
           print("ABSYNTHE LOG: {}".format(line.decode("UTF-8").strip()))
-  
+
   def write(self, data):
     txt = json.dumps(data)
     self.proc.stdin.write((txt + "\n").encode("UTF-8"))
@@ -43,7 +43,7 @@ def handle_action(protocol, bench):
       raise Exception("Unexpected RPC message")
 
 benches = [
-  # benchmarks.SO_11881165_depth1(),
+  benchmarks.SO_11881165_depth1(),
   benchmarks.SO_11941492_depth1()
 ]
 
@@ -52,7 +52,7 @@ for bench in benches:
   proc = subprocess.Popen(['bundle', 'exec', 'bin/autopandas'],
                           stdout=subprocess.PIPE,
                           stdin=subprocess.PIPE,
-                          stderr=subprocess.PIPE,
+                          # stderr=subprocess.PIPE,
                           cwd=r'..')
   p = Protocol(proc, log=True)
   data = bench.absynthe_input()
