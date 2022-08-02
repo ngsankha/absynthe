@@ -43,21 +43,25 @@ def handle_action(protocol, bench):
       raise Exception("Unexpected RPC message")
 
 benches = [
-  benchmarks.SO_11881165_depth1(),
-  benchmarks.SO_11941492_depth1(),
-  benchmarks.SO_13647222_depth1()
+  # benchmarks.SO_11881165_depth1(),
+  # benchmarks.SO_11941492_depth1(),
+  # benchmarks.SO_13647222_depth1(),
+  # benchmarks.SO_18172851_depth1(),
+  # benchmarks.SO_49583055_depth1(),
+  benchmarks.SO_49583055_depth1()
 ]
 
 for bench in benches:
   print("Benchmark: {}".format(type(bench).__name__))
+  data = bench.absynthe_input()
+  data['action'] = 'start'
+
   proc = subprocess.Popen(['bundle', 'exec', 'bin/autopandas'],
                           stdout=subprocess.PIPE,
                           stdin=subprocess.PIPE,
                           # stderr=subprocess.PIPE,
                           cwd=r'..')
   p = Protocol(proc, log=True)
-  data = bench.absynthe_input()
-  data['action'] = 'start'
   p.write(data)
   print(handle_action(p, bench))
   print("========================")

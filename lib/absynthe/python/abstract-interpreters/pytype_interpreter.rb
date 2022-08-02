@@ -37,18 +37,7 @@ module Python
         item0 = node.children[0]
         v = interpret(env, item0)
         domain.val(RDL::Type::GenericType.new(RDL::Globals.types[:array], RDL::Globals.types[:integer]))
-      when :prop
-        recv = interpret(env, node.children[0])
-        prop = node.children[1]
-        arg  = interpret(env, node.children[2])
-        meths = RDL::Globals.info.info[recv.attrs[:ty].to_s]
-        # TODO: uses only the first type defn
-        meth_ty = meths[prop][:type][0]
-        # TODO: only one argument
-        if arg <= PyType.val(meth_ty.args[0])
-          domain.val(meth_ty.ret)
-        end
-      when :send
+      when :prop, :send
         recv = interpret(env, node.children[0])
         meth_name = node.children[1]
         args = node.children[2..].map { |n|
@@ -56,13 +45,15 @@ module Python
         }
         meths = RDL::Globals.info.info[recv.attrs[:ty].to_s]
         # TODO: uses only the first type defn
-        meth_ty = meths[meth_name][:type][0]
-        # TODO: only one argument
-        tc = args.map.with_index { |arg, i|
-          arg <= PyType.val(meth_ty.args[i])
-        }.all?
+        tmeth = nil
+        tc = meths[meth_name][:type].any? { |meth_ty|
+          tmeth = meth_ty
+          args.map.with_index { |arg, i|
+            arg <= PyType.val(meth_ty.args[i])
+          }.all?
+        }
 
-        domain.val(meth_ty.ret) if tc
+        domain.val(tmeth.ret) if tc
       when :hole
         eval_hole(node)
       else

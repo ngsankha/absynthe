@@ -9,10 +9,14 @@ require "fc"
 require "pp"
 
 class DataFrame; end
+class Series; end
+
 RDL.type_params :Array, [:t], :all?
 RDL.type :DataFrame, :loc_getitem, "(Array<Integer>) -> DataFrame"
+RDL.type :DataFrame, :loc_getitem, "({(Series) -> true or false}) -> DataFrame"
 RDL.type :DataFrame, :xs, "(String, level: 0 or 1) -> DataFrame"
 RDL.type :DataFrame, :pivot, "(columns: String, values: String, index: String) -> DataFrame"
+RDL.type :DataFrame, :sort_values, "(by: Array<String>, ascending: Array<true or false>) -> DataFrame"
 
 $stdout.sync = true
 
@@ -46,8 +50,12 @@ class PyLang
     when :const
       konst = node.children[0]
       case konst
-      when Integer, true, false, Symbol
+      when Integer, Symbol
         konst.to_s
+      when true
+        'True'
+      when false
+        'False'
       when String
         konst.inspect
       else
@@ -97,15 +105,22 @@ def parse_rownum(data)
 end
 
 def syn_start(data)
-  fnty = RDL::Globals.parser.scan_str("(#{data['argsty'].join(', ')}) -> #{data['outputty']}")
-  rownum_in, rownum_out = parse_rownum(data)
+  argsty = data['argsty'].map { |arg|
+    if arg == 'Lambda'
+      arg = '{(Series) -> true or false}'
+    else
+      arg
+    end
+  }
+  fnty = RDL::Globals.parser.scan_str("(#{argsty.join(', ')}) -> #{data['outputty']}")
+  # rownum_in, rownum_out = parse_rownum(data)
   spec = PythonSpec.new
 
   tyargs = fnty.args.map { |ty| PyType.val(ty) }
 
   # abs_env = tyargs.zip(rownum_in).each_with_index.map { |arg, i| ["arg#{i}".to_sym,
   #   ProductDomain.val(arg[0], arg[1])]}.to_h
-  abs_env = tyargs.zip(rownum_in).each_with_index.map { |arg, i| ["arg#{i}".to_sym, arg[0]]}.to_h
+  abs_env = tyargs.each_with_index.map { |arg, i| ["arg#{i}".to_sym, arg]}.to_h
   # ctx = Context.new(abs_env, ProductDomain.val(PyType.val(fnty.ret), rownum_out))
   ctx = Context.new(abs_env, PyType.val(fnty.ret))
   ctx.lang = :py

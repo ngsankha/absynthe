@@ -11,9 +11,13 @@ def flatten(xs):
         return xs
 
 class Abstraction:
-    def _infer_type(df):
-        if isinstance(df, pd.DataFrame):
+    def _infer_type(arg):
+        if isinstance(arg, pd.DataFrame):
             return 'DataFrame'
+        elif callable(arg):
+            # NOTE: always return Series -> Bool, but might not be always true
+            # It seems to be sufficient for AutoPandas benchmark
+            return 'Lambda'
         else:
             raise Exception("Unexpected input argument")
 
@@ -33,12 +37,12 @@ class Abstraction:
 
     def all(b):
         tyin, tyout = Abstraction.types(b)
-        rownumin, rownumout = Abstraction.rownums(b)
+        # rownumin, rownumout = Abstraction.rownums(b)
         return {
             'argsty': tyin,
             'outputty': tyout,
-            'rownumin': rownumin,
-            'rownumout': rownumout
+            # 'rownumin': rownumin,
+            # 'rownumout': rownumout
         }
 
 class Benchmark:
@@ -55,7 +59,7 @@ class Benchmark:
         try:
             ret = eval(prog, globals(), env)
         except:
-            print("Eval error: {}".format(prog))
+            # print("Eval error: {}".format(prog))
             return False
         return ret.equals(self.output)
 
