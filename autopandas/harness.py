@@ -48,7 +48,9 @@ benches = [
   # benchmarks.SO_13647222_depth1(),
   # benchmarks.SO_18172851_depth1(),
   # benchmarks.SO_49583055_depth1(),
-  benchmarks.SO_49583055_depth1()
+  # benchmarks.SO_49583055_depth1(),
+  # benchmarks.SO_49592930_depth1(),
+  benchmarks.SO_49572546_depth1()
 ]
 
 for bench in benches:

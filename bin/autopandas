@@ -17,6 +17,7 @@ RDL.type :DataFrame, :loc_getitem, "({(Series) -> true or false}) -> DataFrame"
 RDL.type :DataFrame, :xs, "(String, level: 0 or 1) -> DataFrame"
 RDL.type :DataFrame, :pivot, "(columns: String, values: String, index: String) -> DataFrame"
 RDL.type :DataFrame, :sort_values, "(by: Array<String>, ascending: Array<true or false>) -> DataFrame"
+RDL.type :DataFrame, :combine_first, "(DataFrame) -> DataFrame"
 
 $stdout.sync = true
 
