@@ -12,6 +12,7 @@ class DataFrame; end
 RDL.type_params :Array, [:t], :all?
 RDL.type :DataFrame, :loc_getitem, "(Array<Integer>) -> DataFrame"
 RDL.type :DataFrame, :xs, "(String, level: 0 or 1) -> DataFrame"
+RDL.type :DataFrame, :pivot, "(columns: String, values: String, index: String) -> DataFrame"
 
 $stdout.sync = true
 

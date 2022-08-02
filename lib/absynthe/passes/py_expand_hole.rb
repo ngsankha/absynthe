@@ -28,6 +28,9 @@ class ExpandHolePass < ::AST::Processor
     # TODO: fix constants
     if RDL::Globals.types[:string] <= ty
       expanded << s(:const, 'a')
+      expanded << s(:const, 'series')
+      expanded << s(:const, 'value')
+      expanded << s(:const, 'step')
     elsif RDL::Type::SingletonType.new(0) <= ty
       expanded << s(:const, 0)
     elsif RDL::Type::SingletonType.new(1) <= ty

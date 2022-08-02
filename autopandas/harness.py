@@ -44,7 +44,8 @@ def handle_action(protocol, bench):
 
 benches = [
   benchmarks.SO_11881165_depth1(),
-  benchmarks.SO_11941492_depth1()
+  benchmarks.SO_11941492_depth1(),
+  benchmarks.SO_13647222_depth1()
 ]
 
 for bench in benches:
