@@ -50,7 +50,9 @@ benches = [
   # benchmarks.SO_49583055_depth1(),
   # benchmarks.SO_49583055_depth1(),
   # benchmarks.SO_49592930_depth1(),
-  benchmarks.SO_49572546_depth1()
+  # benchmarks.SO_49572546_depth1(),
+  # benchmarks.SO_12860421_depth1(),
+  benchmarks.SO_13261175_depth1()
 ]
 
 for bench in benches:

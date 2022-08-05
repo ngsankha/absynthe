@@ -10,14 +10,17 @@ require "pp"
 
 class DataFrame; end
 class Series; end
+class Lambda; end
+class NUnique; end
 
 RDL.type_params :Array, [:t], :all?
-RDL.type :DataFrame, :loc_getitem, "(Array<Integer>) -> DataFrame"
-RDL.type :DataFrame, :loc_getitem, "({(Series) -> true or false}) -> DataFrame"
-RDL.type :DataFrame, :xs, "(String, level: 0 or 1) -> DataFrame"
-RDL.type :DataFrame, :pivot, "(columns: String, values: String, index: String) -> DataFrame"
-RDL.type :DataFrame, :sort_values, "(by: Array<String>, ascending: Array<true or false>) -> DataFrame"
-RDL.type :DataFrame, :combine_first, "(DataFrame) -> DataFrame"
+# RDL.type :DataFrame, :loc_getitem, "(Array<Integer>) -> DataFrame"
+# RDL.type :DataFrame, :loc_getitem, "(Lambda) -> DataFrame"
+# RDL.type :DataFrame, :xs, "(String, level: 0 or 1) -> DataFrame"
+# RDL.type :DataFrame, :pivot, "(columns: String, values: String, index: String) -> DataFrame"
+# RDL.type :DataFrame, :sort_values, "(by: Array<String>, ascending: Array<true or false>) -> DataFrame"
+# RDL.type :DataFrame, :combine_first, "(DataFrame) -> DataFrame"
+RDL.type :DataFrame, :pivot_table, "(values: String, index: String, columns: String, aggfunc: Lambda) -> DataFrame"
 
 $stdout.sync = true
 
@@ -57,6 +60,8 @@ class PyLang
         'True'
       when false
         'False'
+      when NUnique
+        'pd.Series.nunique'
       when String
         konst.inspect
       else
@@ -106,13 +111,7 @@ def parse_rownum(data)
 end
 
 def syn_start(data)
-  argsty = data['argsty'].map { |arg|
-    if arg == 'Lambda'
-      arg = '{(Series) -> true or false}'
-    else
-      arg
-    end
-  }
+  argsty = data['argsty']
   fnty = RDL::Globals.parser.scan_str("(#{argsty.join(', ')}) -> #{data['outputty']}")
   # rownum_in, rownum_out = parse_rownum(data)
   spec = PythonSpec.new

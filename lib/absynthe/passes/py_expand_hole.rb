@@ -27,14 +27,13 @@ class ExpandHolePass < ::AST::Processor
     # consts
     # TODO: fix constants
     if RDL::Globals.types[:string] <= ty
-      expanded << s(:const, 'a')
-      expanded << s(:const, 'series')
-      expanded << s(:const, 'value')
-      expanded << s(:const, 'step')
+      ['a', 'series', 'value', 'step', 'X', 'Y', 'Z', 'name'].each { |v| expanded << s(:const, v) }
     elsif RDL::Type::SingletonType.new(0) <= ty
       expanded << s(:const, 0)
     elsif RDL::Type::SingletonType.new(1) <= ty
       expanded << s(:const, 1)
+    elsif ty.is_a? RDL::Type::MethodType
+      expanded << s(:const, NUnique.new)
     end
 
     # vars
@@ -55,11 +54,24 @@ class ExpandHolePass < ::AST::Processor
         expanded << s(:array, *[0, 2, 4].map { |n| s(:const, n) })
       elsif ty.params[0] <= RDL::Globals.types[:string]
         expanded << s(:array, *['ID', 'first', 'admit'].map { |n| s(:const, n) })
+        expanded << s(:array, *['type', 'date'].map { |n| s(:const, n) })
       elsif ty.params[0] <= RDL::Globals.types[:bool]
         expanded << s(:array, *[true, false, true].map { |n| s(:const, n) })
       else
         raise AbsyntheError, "unhandled type"
       end
+    end
+
+    # hashes
+    if ty.is_a? RDL::Type::FiniteHashType
+      ty.elts.size.times { |i|
+        keys = ty.elts.keys.combination(i + 1)
+        keys.each { |ks|
+          expanded << s(:hash, *ks.map { |k|
+                        s(:key, k, s(:hole, nil, PyType.val(ty.elts[k])))
+                      })
+        }
+      }
     end
 
     # props
@@ -113,9 +125,7 @@ class ExpandHolePass < ::AST::Processor
               # s(:hash, *arg.elts.map { |k, v|
               #   s(:key, k, s(:hole, nil, ProductDomain.val(PyType.val(v), PandasRows.fresh_var)))
               #   })
-              s(:hash, *arg.elts.map { |k, v|
-                s(:key, k, s(:hole, nil, PyType.val(v)))
-              })
+              s(:hole, nil, PyType.val(arg))
             else
               raise AbsyntheError, "unexpected type #{arg}"
             end

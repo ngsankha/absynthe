@@ -15,6 +15,30 @@ class PyType < AbstractDomain
     @@top
   end
 
+  def promote
+    if @attrs[:ty].is_a?(RDL::Type::GenericType) &&
+       @attrs[:ty].base == RDL::Globals.types[:array]
+      ty = RDL::Type::GenericType.new(
+        RDL::Globals.types[:array],
+        promote_impl(@attrs[:ty].params[0]))
+      return PyType.val(ty)
+    end
+
+    self
+  end
+
+  def promote_impl(rdl_ty)
+    if rdl_ty.is_a?(RDL::Type::UnionType)
+      if rdl_ty.types.all? { |ty|
+        ty.is_a?(RDL::Type::SingletonType) &&
+        ty.val.is_a?(Integer) }
+        return RDL::Globals.types[:integer]
+      end
+    end
+
+    rdl_ty
+  end
+
   def self.bot
     @@bot
   end
@@ -44,7 +68,16 @@ class PyType < AbstractDomain
   end
 
   def val_leq(lhs, rhs)
-    lhs.attrs[:ty] <= rhs.attrs[:ty]
+    if lhs.attrs[:ty].is_a?(RDL::Type::FiniteHashType) &&
+       rhs.attrs[:ty].is_a?(RDL::Type::FiniteHashType)
+      # treat all keys as optional
+      lhs.attrs[:ty].elts.keys.all? { |k|
+        rhs.attrs[:ty].elts.key?(k) &&
+        lhs.attrs[:ty].elts[k] <= rhs.attrs[:ty].elts[k]
+      }
+    else
+      lhs.attrs[:ty] <= rhs.attrs[:ty]
+    end
   end
 
   def var_leq(lhs, rhs)
