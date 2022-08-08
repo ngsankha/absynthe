@@ -30,6 +30,8 @@ def synthesize(ctx, spec, q)
         absval = interpreter.interpret(ctx.init_env, prog)
         # src = Sygus::unparse(prog)
         # puts "#{src} :: #{absval}"
+        # puts "==>"
+        # puts prog
 
         # solve dependent holes at <=, model gives value to remaining hole
         if absval <= ctx.goal
@@ -41,8 +43,9 @@ def synthesize(ctx, spec, q)
               raise AbsyntheError, "invariant of 1 dephole broken"
             end
           end
+          score = ctx.score.call(prog)
           size = ProgSizePass.prog_size(prog)
-          q.push(prog, size) if size <= ctx.max_size
+          q.push(prog, score) if size <= ctx.max_size
         end
       else
         # src = Sygus::unparse(prog)
@@ -56,12 +59,4 @@ def synthesize(ctx, spec, q)
     }
   end
   raise AbsyntheError, "No candidates found!"
-end
-
-def score(prog)
-  # hc_pass = HoleCountPass.new
-  # hc_pass.process(prog)
-  # hc_pass.num_holes + hc_pass.num_depholes
-  ProgSizePass.prog_size(prog)
-  # (num_holes * 100) + size
 end

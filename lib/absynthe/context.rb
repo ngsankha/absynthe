@@ -1,6 +1,6 @@
 class Context
   attr_reader :max_size, :init_env, :goal
-  attr_accessor :lang, :domain, :cache
+  attr_accessor :lang, :domain, :cache, :score
   def initialize(init_env, goal)
     @max_size = 25
     @domain = init_env.first[1].class
@@ -8,5 +8,6 @@ class Context
     @lang = :sygus
     @goal = goal
     @cache = {}
+    @score = Proc.new { |prog| ProgSizePass.prog_size(prog) }
   end
 end

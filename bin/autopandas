@@ -14,13 +14,14 @@ class Lambda; end
 class NUnique; end
 
 RDL.type_params :Array, [:t], :all?
-# RDL.type :DataFrame, :loc_getitem, "(Array<Integer>) -> DataFrame"
-# RDL.type :DataFrame, :loc_getitem, "(Lambda) -> DataFrame"
-# RDL.type :DataFrame, :xs, "(String, level: 0 or 1) -> DataFrame"
-# RDL.type :DataFrame, :pivot, "(columns: String, values: String, index: String) -> DataFrame"
-# RDL.type :DataFrame, :sort_values, "(by: Array<String>, ascending: Array<true or false>) -> DataFrame"
-# RDL.type :DataFrame, :combine_first, "(DataFrame) -> DataFrame"
+RDL.type :DataFrame, :loc_getitem, "(Array<Integer>) -> DataFrame"
+RDL.type :DataFrame, :loc_getitem, "(Lambda) -> DataFrame"
+RDL.type :DataFrame, :xs, "(String, level: 0 or 1) -> DataFrame"
+RDL.type :DataFrame, :pivot, "(columns: String, values: String, index: String) -> DataFrame"
+RDL.type :DataFrame, :sort_values, "(by: Array<String>, ascending: Array<true or false>) -> DataFrame"
+RDL.type :DataFrame, :combine_first, "(DataFrame) -> DataFrame"
 RDL.type :DataFrame, :pivot_table, "(values: String, index: String, columns: String, aggfunc: Lambda) -> DataFrame"
+RDL.type :DataFrame, :pivot_table, "(values: String, index: String, columns: Array<String>, aggfunc: Lambda) -> DataFrame"
 
 $stdout.sync = true
 
@@ -126,6 +127,7 @@ def syn_start(data)
   ctx.lang = :py
   # ctx.domain = ProductDomain
   ctx.domain = PyType
+  ctx.score = Proc.new { |prog| WeightedSizePass.prog_size(prog) }
   seed = s(:hole, nil, ctx.goal)
   q = FastContainers::PriorityQueue.new(:min)
   q.push(seed, ProgSizePass.prog_size(seed))
