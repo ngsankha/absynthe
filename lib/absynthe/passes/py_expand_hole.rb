@@ -28,12 +28,18 @@ class ExpandHolePass < ::AST::Processor
     # TODO: fix constants
     if RDL::Globals.types[:string] <= ty
       ['a', 'series', 'value', 'step', 'X', 'Y', 'Z', 'name'].each { |v| expanded << s(:const, v) }
-    elsif RDL::Type::SingletonType.new(0) <= ty
+    end
+    if RDL::Type::SingletonType.new(0) <= ty
       expanded << s(:const, 0)
-    elsif RDL::Type::SingletonType.new(1) <= ty
+    end
+    if RDL::Type::SingletonType.new(1) <= ty
       expanded << s(:const, 1)
-    elsif ty.is_a? RDL::Type::MethodType
+    end
+    if ty.is_a? RDL::Type::MethodType
       expanded << s(:const, NUnique.new)
+    end
+    if RDL::Globals.types[:integer] <= ty
+      [10].each { |v| expanded << s(:const, v) }
     end
 
     # vars
@@ -55,8 +61,10 @@ class ExpandHolePass < ::AST::Processor
       elsif ty.params[0] <= RDL::Globals.types[:string]
         expanded << s(:array, *['ID', 'first', 'admit'].map { |n| s(:const, n) })
         expanded << s(:array, *['type', 'date'].map { |n| s(:const, n) })
+        expanded << s(:array, *['SEGM1', 'Distribuzione Ponderata'].map { |n| s(:const, n) })
       elsif ty.params[0] <= RDL::Globals.types[:bool]
         expanded << s(:array, *[true, false, true].map { |n| s(:const, n) })
+        expanded << s(:array, *[true, false].map { |n| s(:const, n) })
       else
         raise AbsyntheError, "unhandled type"
       end
@@ -125,6 +133,8 @@ class ExpandHolePass < ::AST::Processor
               # s(:hash, *arg.elts.map { |k, v|
               #   s(:key, k, s(:hole, nil, ProductDomain.val(PyType.val(v), PandasRows.fresh_var)))
               #   })
+              s(:hole, nil, PyType.val(arg))
+            elsif arg.is_a? RDL::Type::GenericType
               s(:hole, nil, PyType.val(arg))
             else
               raise AbsyntheError, "unexpected type #{arg}"

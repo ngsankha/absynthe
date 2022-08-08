@@ -43,16 +43,18 @@ def handle_action(protocol, bench):
       raise Exception("Unexpected RPC message")
 
 benches = [
-  benchmarks.SO_11881165_depth1(),
-  benchmarks.SO_11941492_depth1(),
-  benchmarks.SO_13647222_depth1(),
-  benchmarks.SO_18172851_depth1(),
-  benchmarks.SO_49583055_depth1(),
-  benchmarks.SO_49583055_depth1(),
-  benchmarks.SO_49592930_depth1(),
-  benchmarks.SO_49572546_depth1(),
-  benchmarks.SO_12860421_depth1(),
-  benchmarks.SO_13261175_depth1()
+  # benchmarks.SO_11881165_depth1(),
+  # benchmarks.SO_11941492_depth1(),
+  # benchmarks.SO_13647222_depth1(),
+  # benchmarks.SO_18172851_depth1(),
+  # benchmarks.SO_49583055_depth1(),
+  # benchmarks.SO_49583055_depth1(),
+  # benchmarks.SO_49592930_depth1(),
+  # benchmarks.SO_49572546_depth1(),
+  # benchmarks.SO_12860421_depth1(),
+  # benchmarks.SO_13261175_depth1(),
+  # benchmarks.SO_13793321_depth1(),
+  benchmarks.SO_14085517_depth1()
 ]
 
 for bench in benches:

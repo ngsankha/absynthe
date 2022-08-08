@@ -53,7 +53,9 @@ module Python
         meths = RDL::Globals.info.info[recv.attrs[:ty].to_s]
         ret_ty = domain.top
 
-        meths[meth_name][:type].each { |meth_ty|
+        meths[meth_name][:type].filter { |ty|
+          ty.args.size == args.size
+        }.each { |meth_ty|
           tc = args.map.with_index { |arg, i|
             res = arg <= PyType.val(meth_ty.args[i])
             res = arg.promote <= PyType.val(meth_ty.args[i]) unless res
