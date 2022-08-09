@@ -27,7 +27,10 @@ class ExpandHolePass < ::AST::Processor
     # consts
     # TODO: fix constants
     if RDL::Globals.types[:string] <= ty
-      ['a', 'series', 'value', 'step', 'X', 'Y', 'Z', 'name', 'ffill', 'Group', 'Var1', 'Var2'].each { |v| expanded << s(:const, v) }
+      ['a', 'series', 'value', 'step',
+       'X', 'Y', 'Z', 'name', 'ffill',
+       'Group', 'Var1', 'Var2', 'yes',
+       'STK_ID'].each { |v| expanded << s(:const, v) }
     end
     if ty.is_a? RDL::Type::SingletonType
       expanded << s(:const, ty.val)
@@ -39,7 +42,7 @@ class ExpandHolePass < ::AST::Processor
       expanded << s(:const, PyInt.new)
     end
     if RDL::Globals.types[:integer] <= ty
-      [10].each { |v| expanded << s(:const, v) }
+      [0, 1, 10].each { |v| expanded << s(:const, v) }
     end
 
     # union type
@@ -96,7 +99,7 @@ class ExpandHolePass < ::AST::Processor
       next if cls.to_s.include?("RDL::")
       mthds.delete(:__getobj__)
       mthds.each { |mthd, info|
-        next unless [:loc_getitem, :__getitem__].include?(mthd)
+        next unless [:loc_getitem, :__getitem__, :T, :values].include?(mthd)
         trecv = RDL::Type::NominalType.new(cls)
         info[:type].each { |tmeth|
           next unless tmeth.ret <= ty
@@ -126,7 +129,7 @@ class ExpandHolePass < ::AST::Processor
       next if cls.to_s.include?("RDL::")
       mthds.delete(:__getobj__)
       mthds.each { |mthd, info|
-        next if [:loc_getitem, :__getitem__].include?(mthd)
+        next if [:loc_getitem, :__getitem__, :T, :values].include?(mthd)
         trecv = RDL::Type::NominalType.new(cls)
         info[:type].each { |tmeth|
           next unless tmeth.ret <= ty
@@ -135,15 +138,13 @@ class ExpandHolePass < ::AST::Processor
 
           targs = tmeth.args
           arg_terms = targs.map { |arg|
-            if arg.is_a? RDL::Type::NominalType
+            if [RDL::Type::NominalType, RDL::Type::GenericType, RDL::Type::UnionType].any? { |t| arg.is_a? t }
               # s(:hole, nil, ProductDomain.val(PyType.val(arg), PandasRows.fresh_var))
               s(:hole, nil, PyType.val(arg))
             elsif arg.is_a? RDL::Type::FiniteHashType
               # s(:hash, *arg.elts.map { |k, v|
               #   s(:key, k, s(:hole, nil, ProductDomain.val(PyType.val(v), PandasRows.fresh_var)))
               #   })
-              s(:hole, nil, PyType.val(arg))
-            elsif arg.is_a? RDL::Type::GenericType
               s(:hole, nil, PyType.val(arg))
             else
               raise AbsyntheError, "unexpected type #{arg}"

@@ -15,11 +15,12 @@ class NUnique < Lambda; end
 class Type; end
 class PyInt < Type; end
 class DataFrameGroupBy; end
+class NdArray; end
 
 RDL.type_params :Array, [:t], :all?
 RDL.type :DataFrame, :loc_getitem, "(Array<Integer>) -> DataFrame"
 RDL.type :DataFrame, :loc_getitem, "(Lambda) -> DataFrame"
-RDL.type :DataFrame, :xs, "(String, level: 0 or 1) -> DataFrame"
+RDL.type :DataFrame, :xs, "(String, level: Integer) -> DataFrame"
 RDL.type :DataFrame, :pivot, "(columns: String, values: String, index: String) -> DataFrame"
 RDL.type :DataFrame, :sort_values, "(by: Array<String>, ascending: Array<true or false>) -> DataFrame"
 RDL.type :DataFrame, :sort_values, "(Array<String>, ascending: Array<true or false>) -> DataFrame"
@@ -40,6 +41,12 @@ RDL.type :DataFrame, :groupby, "(Array<String>) -> DataFrameGroupBy"
 RDL.type :DataFrameGroupBy, :size, "() -> Series"
 RDL.type :DataFrame, :dropna, '() -> DataFrame'
 RDL.type :DataFrame, :reset_index, '(drop: true or false) -> DataFrame'
+RDL.type :DataFrame, :T, '() -> DataFrameGroupBy'
+RDL.type :DataFrameGroupBy, :reset_index, '() -> DataFrame'
+RDL.type :DataFrame, :values, '() -> NdArray'
+RDL.type :DataFrame, :sum, '(0 or 1, level: Integer) -> DataFrame'
+RDL.type :DataFrame, :div, '(DataFrame, 0 or 1, Integer) -> DataFrame'
+RDL.type :DataFrame, :xs, "(String, 0 or 1, Integer) -> DataFrame"
 
 $stdout.sync = true
 
@@ -95,9 +102,20 @@ class PyLang
         propname = ".loc"
       elsif propname == "__getitem__"
         propname = ""
+      elsif propname == "values"
+        propname = ".values"
+      elsif propname == "T"
+        propname = ".T"
       end
+
       args = node.children[2..].map { |n| unparse(n) }.join(", ")
-      "#{recv}#{propname}[#{args}]"
+      if args.empty?
+        fmtargs = ""
+      else
+        fmtargs = "[#{args}]"
+      end
+
+      "#{recv}#{propname}#{fmtargs}"
     when :send
       recv = unparse(node.children[0])
       methd_name = node.children[1].to_s
