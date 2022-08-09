@@ -11,7 +11,9 @@ require "pp"
 class DataFrame; end
 class Series; end
 class Lambda; end
-class NUnique; end
+class NUnique < Lambda; end
+class Type; end
+class PyInt < Type; end
 
 RDL.type_params :Array, [:t], :all?
 RDL.type :DataFrame, :loc_getitem, "(Array<Integer>) -> DataFrame"
@@ -24,6 +26,14 @@ RDL.type :DataFrame, :combine_first, "(DataFrame) -> DataFrame"
 RDL.type :DataFrame, :pivot_table, "(values: String, index: String, columns: String, aggfunc: Lambda) -> DataFrame"
 RDL.type :DataFrame, :pivot_table, "(values: String, index: String, columns: Array<String>, aggfunc: Lambda) -> DataFrame"
 RDL.type :DataFrame, :merge, "(DataFrame, on: Integer) -> DataFrame"
+RDL.type :DataFrame, :merge, "(DataFrame, on: Array<String>) -> DataFrame"
+RDL.type :DataFrame, :__getitem__, "(Series) -> DataFrame"
+RDL.type :DataFrame, :apply, "(Lambda, axis: 0 or 1) -> Series"
+RDL.type :DataFrame, :query, "(String) -> DataFrame"
+RDL.type :DataFrame, :fillna, "(method: String) -> DataFrame"
+RDL.type :DataFrame, :astype, "(Type) -> DataFrame"
+RDL.type :DataFrame, :stack, "() -> DataFrame"
+RDL.type :DataFrame, :unstack, "() -> DataFrame"
 
 $stdout.sync = true
 
@@ -65,6 +75,8 @@ class PyLang
         'False'
       when NUnique
         'pd.Series.nunique'
+      when PyInt
+        'int'
       when String
         konst.inspect
       else
@@ -73,9 +85,13 @@ class PyLang
     when :prop
       recv = unparse(node.children[0])
       propname = node.children[1].to_s
-      propname = "loc" if propname == "loc_getitem"
+      if propname == "loc_getitem"
+        propname = ".loc"
+      elsif propname == "__getitem__"
+        propname = ""
+      end
       args = node.children[2..].map { |n| unparse(n) }.join(", ")
-      "#{recv}.#{propname}[#{args}]"
+      "#{recv}#{propname}[#{args}]"
     when :send
       recv = unparse(node.children[0])
       methd_name = node.children[1].to_s

@@ -17,8 +17,8 @@ module Python
           domain.val(RDL::Type::SingletonType.new(konst))
         when String
           domain.val(RDL::Globals.types[:string])
-        when NUnique
-          domain.val(RDL::Type::NominalType('Lambda'))
+        when NUnique, PyInt
+          domain.val(RDL::Type::NominalType.new(konst.class))
         when Symbol
           # assume all environment maps to abstract values
           env[konst]

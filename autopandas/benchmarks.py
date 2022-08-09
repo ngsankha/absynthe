@@ -14,6 +14,8 @@ class Abstraction:
     def _infer_type(arg):
         if isinstance(arg, pd.DataFrame):
             return 'DataFrame'
+        elif isinstance(arg, str):
+            return 'String'
         elif callable(arg):
             # NOTE: always return Series -> Bool, but might not be always true
             # It seems to be sufficient for AutoPandas benchmark

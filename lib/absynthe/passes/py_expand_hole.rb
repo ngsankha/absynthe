@@ -27,7 +27,7 @@ class ExpandHolePass < ::AST::Processor
     # consts
     # TODO: fix constants
     if RDL::Globals.types[:string] <= ty
-      ['a', 'series', 'value', 'step', 'X', 'Y', 'Z', 'name'].each { |v| expanded << s(:const, v) }
+      ['a', 'series', 'value', 'step', 'X', 'Y', 'Z', 'name', 'ffill'].each { |v| expanded << s(:const, v) }
     end
     if RDL::Type::SingletonType.new(0) <= ty
       expanded << s(:const, 0)
@@ -35,8 +35,11 @@ class ExpandHolePass < ::AST::Processor
     if RDL::Type::SingletonType.new(1) <= ty
       expanded << s(:const, 1)
     end
-    if ty.is_a? RDL::Type::MethodType
+    if RDL::Type::NominalType.new(Lambda) <= ty
       expanded << s(:const, NUnique.new)
+    end
+    if RDL::Type::NominalType.new(Type) <= ty
+      expanded << s(:const, PyInt.new)
     end
     if RDL::Globals.types[:integer] <= ty
       [10].each { |v| expanded << s(:const, v) }
@@ -62,6 +65,7 @@ class ExpandHolePass < ::AST::Processor
         expanded << s(:array, *['ID', 'first', 'admit'].map { |n| s(:const, n) })
         expanded << s(:array, *['type', 'date'].map { |n| s(:const, n) })
         expanded << s(:array, *['SEGM1', 'Distribuzione Ponderata'].map { |n| s(:const, n) })
+        expanded << s(:array, *['id'].map { |n| s(:const, n) })
       elsif ty.params[0] <= RDL::Globals.types[:bool]
         expanded << s(:array, *[true, false, true].map { |n| s(:const, n) })
         expanded << s(:array, *[true, false].map { |n| s(:const, n) })
@@ -87,7 +91,7 @@ class ExpandHolePass < ::AST::Processor
       next if cls.to_s.include?("RDL::")
       mthds.delete(:__getobj__)
       mthds.each { |mthd, info|
-        next unless mthd.to_s.end_with? "_getitem"
+        next unless [:loc_getitem, :__getitem__].include?(mthd)
         trecv = RDL::Type::NominalType.new(cls)
         info[:type].each { |tmeth|
           next unless tmeth.ret <= ty
@@ -117,7 +121,7 @@ class ExpandHolePass < ::AST::Processor
       next if cls.to_s.include?("RDL::")
       mthds.delete(:__getobj__)
       mthds.each { |mthd, info|
-        next if mthd.to_s.end_with? "_getitem"
+        next if [:loc_getitem, :__getitem__].include?(mthd)
         trecv = RDL::Type::NominalType.new(cls)
         info[:type].each { |tmeth|
           next unless tmeth.ret <= ty
