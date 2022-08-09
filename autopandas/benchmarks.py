@@ -14,11 +14,13 @@ class Abstraction:
     def _infer_type(arg):
         if isinstance(arg, pd.DataFrame):
             return 'DataFrame'
+        if isinstance(arg, pd.Series):
+            print("Found series")
+            return 'Series'
         elif isinstance(arg, str):
             return 'String'
         elif callable(arg):
-            # NOTE: always return Series -> Bool, but might not be always true
-            # It seems to be sufficient for AutoPandas benchmark
+            # NOTE: all functions a -> b are typed as Lambda
             return 'Lambda'
         else:
             raise Exception("Unexpected input argument")

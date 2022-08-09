@@ -14,6 +14,7 @@ class Lambda; end
 class NUnique < Lambda; end
 class Type; end
 class PyInt < Type; end
+class DataFrameGroupBy; end
 
 RDL.type_params :Array, [:t], :all?
 RDL.type :DataFrame, :loc_getitem, "(Array<Integer>) -> DataFrame"
@@ -24,6 +25,7 @@ RDL.type :DataFrame, :sort_values, "(by: Array<String>, ascending: Array<true or
 RDL.type :DataFrame, :sort_values, "(Array<String>, ascending: Array<true or false>) -> DataFrame"
 RDL.type :DataFrame, :combine_first, "(DataFrame) -> DataFrame"
 RDL.type :DataFrame, :pivot_table, "(values: String, index: String, columns: String, aggfunc: Lambda) -> DataFrame"
+RDL.type :DataFrame, :pivot_table, "(values: String, index: String, columns: String, aggfunc: String) -> DataFrame"
 RDL.type :DataFrame, :pivot_table, "(values: String, index: String, columns: Array<String>, aggfunc: Lambda) -> DataFrame"
 RDL.type :DataFrame, :merge, "(DataFrame, on: Integer) -> DataFrame"
 RDL.type :DataFrame, :merge, "(DataFrame, on: Array<String>) -> DataFrame"
@@ -34,6 +36,10 @@ RDL.type :DataFrame, :fillna, "(method: String) -> DataFrame"
 RDL.type :DataFrame, :astype, "(Type) -> DataFrame"
 RDL.type :DataFrame, :stack, "() -> DataFrame"
 RDL.type :DataFrame, :unstack, "() -> DataFrame"
+RDL.type :DataFrame, :groupby, "(Array<String>) -> DataFrameGroupBy"
+RDL.type :DataFrameGroupBy, :size, "() -> Series"
+RDL.type :DataFrame, :dropna, '() -> DataFrame'
+RDL.type :DataFrame, :reset_index, '(drop: true or false) -> DataFrame'
 
 $stdout.sync = true
 

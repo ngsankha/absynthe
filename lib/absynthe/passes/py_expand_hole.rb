@@ -27,13 +27,10 @@ class ExpandHolePass < ::AST::Processor
     # consts
     # TODO: fix constants
     if RDL::Globals.types[:string] <= ty
-      ['a', 'series', 'value', 'step', 'X', 'Y', 'Z', 'name', 'ffill'].each { |v| expanded << s(:const, v) }
+      ['a', 'series', 'value', 'step', 'X', 'Y', 'Z', 'name', 'ffill', 'Group', 'Var1', 'Var2'].each { |v| expanded << s(:const, v) }
     end
-    if RDL::Type::SingletonType.new(0) <= ty
-      expanded << s(:const, 0)
-    end
-    if RDL::Type::SingletonType.new(1) <= ty
-      expanded << s(:const, 1)
+    if ty.is_a? RDL::Type::SingletonType
+      expanded << s(:const, ty.val)
     end
     if RDL::Type::NominalType.new(Lambda) <= ty
       expanded << s(:const, NUnique.new)
@@ -43,6 +40,13 @@ class ExpandHolePass < ::AST::Processor
     end
     if RDL::Globals.types[:integer] <= ty
       [10].each { |v| expanded << s(:const, v) }
+    end
+
+    # union type
+    if ty.is_a? RDL::Type::UnionType
+      ty.types.each { |t|
+        expanded << s(:hole, nil, PyType.val(t))
+      }
     end
 
     # vars
@@ -66,6 +70,7 @@ class ExpandHolePass < ::AST::Processor
         expanded << s(:array, *['type', 'date'].map { |n| s(:const, n) })
         expanded << s(:array, *['SEGM1', 'Distribuzione Ponderata'].map { |n| s(:const, n) })
         expanded << s(:array, *['id'].map { |n| s(:const, n) })
+        expanded << s(:array, *['ip', 'useragent'].map { |n| s(:const, n) })
       elsif ty.params[0] <= RDL::Globals.types[:bool]
         expanded << s(:array, *[true, false, true].map { |n| s(:const, n) })
         expanded << s(:array, *[true, false].map { |n| s(:const, n) })
