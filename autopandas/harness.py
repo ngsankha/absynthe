@@ -4,6 +4,7 @@ import benchmarks
 import unittest
 import warnings
 import time
+import random
 from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.formatters import TerminalFormatter
@@ -33,6 +34,7 @@ benches = [
   # benchmarks.SO_11811392_depth3(),
   # benchmarks.SO_49581206_depth3(), # slow
 ]
+random.shuffle(benches)
 
 def pprint_color(obj):
     print(highlight(obj, PythonLexer(), TerminalFormatter()))
