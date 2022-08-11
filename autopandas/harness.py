@@ -11,7 +11,7 @@ from pygments.formatters import TerminalFormatter
 from protocol import Protocol, handle_action
 
 benches = [
-  benchmarks.SO_11881165_depth1(),
+  # benchmarks.SO_11881165_depth1(),
   # benchmarks.SO_11941492_depth1(),
   # benchmarks.SO_13647222_depth1(),
   # benchmarks.SO_18172851_depth1(),
@@ -33,6 +33,13 @@ benches = [
   # benchmarks.SO_10982266_depth3(), # fail
   # benchmarks.SO_11811392_depth3(),
   # benchmarks.SO_49581206_depth3(), # slow
+  # benchmarks.SO_12065885_depth3(), # slow
+  # benchmarks.SO_13576164_depth3(),
+  # benchmarks.SO_14023037_depth3(),
+  # benchmarks.SO_53762029_depth3(),
+  # benchmarks.SO_21982987_depth3(), # not tried
+  # benchmarks.SO_39656670_depth3(),
+  benchmarks.SO_23321300_depth3()
 ]
 random.shuffle(benches)
 
@@ -47,7 +54,7 @@ for bench in benches:
   proc = subprocess.Popen(['bundle', 'exec', 'bin/autopandas'],
                           stdout=subprocess.PIPE,
                           stdin=subprocess.PIPE,
-                          stderr=subprocess.PIPE,
+                          # stderr=subprocess.PIPE,
                           cwd=r'..')
   p = Protocol(proc, log=True)
   start_time = time.perf_counter()
@@ -62,4 +69,4 @@ for bench in benches:
   proc.wait()
   proc.stdin.close()
   proc.stdout.close()
-  proc.stderr.close()
+  # proc.stderr.close()

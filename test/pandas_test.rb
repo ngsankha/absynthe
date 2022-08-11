@@ -8,6 +8,8 @@ require "rdl"
 
 class DataFrame; end
 class NUnique; end
+class Type; end
+class PyInt < Type; end
 RDL.type_params :Array, [:t], :all?
 
 class PandasTest < Minitest::Test
@@ -90,5 +92,19 @@ class PandasTest < Minitest::Test
     pytype = PyType.val(ty).promote
 
     assert_equal pytype.attrs[:ty], ty
+  end
+
+  def test_generic_pytype
+    RDL.type :Array, :__getitem__, "(Integer) -> t"
+
+    prog = s(:prop,
+            s(:const, :arg1),
+            :__getitem__,
+            s(:const, 0))
+
+    res = Python::PyTypeInterpreter.interpret({
+      arg1: PyType.val(RDL::Globals.parser.scan_str("() -> Array<Array<Integer>>").ret)
+    }, prog)
+    assert res <= PyType.val(RDL::Globals.parser.scan_str("() -> Array<Integer>").ret)
   end
 end

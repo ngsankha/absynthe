@@ -12,17 +12,21 @@ class Abstraction:
     def _infer_type(arg):
         if isinstance(arg, pd.DataFrame):
             return 'DataFrame'
-        if isinstance(arg, pd.Series):
+        elif isinstance(arg, pd.Series):
             return 'Series'
-        if isinstance(arg, np.ndarray):
+        elif isinstance(arg, np.ndarray):
             return 'NdArray'
         elif isinstance(arg, str):
             return 'String'
+        elif isinstance(arg, int):
+            return 'Integer'
+        elif isinstance(arg, list):
+            return 'Array<{}>'.format(Abstraction._infer_type(arg[0]))
         elif callable(arg):
             # NOTE: all functions a -> b are typed as Lambda
             return 'Lambda'
         else:
-            raise Exception("Unexpected input argument")
+            raise Exception("Unexpected input argument {}".format(arg))
 
     def _infer_rownum(df):
         # return list(df.index)
@@ -61,10 +65,12 @@ class Benchmark:
             env['arg' + str(i)] = self.inputs[i]
         try:
             ret = eval(prog, globals(), env)
+            if isinstance(ret, np.ndarray):
+                return np.array_equal(ret, self.output)
+            elif isinstance(ret, list):
+                return ret == self.output
+            else:
+                return ret.equals(self.output)
         except:
             # print("Eval error: {}".format(prog))
             return False
-        if isinstance(ret, np.ndarray):
-            return np.array_equal(ret, self.output)
-        else:
-            return ret.equals(self.output)

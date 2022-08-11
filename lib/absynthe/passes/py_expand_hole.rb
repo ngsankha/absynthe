@@ -27,13 +27,17 @@ class ExpandHolePass < ::AST::Processor
     # consts
     # TODO: fix constants
     if RDL::Globals.types[:string] <= ty
-      ['a', 'series', 'value', 'step',
-       'X', 'Y', 'Z', 'name', 'ffill',
-       'Group', 'Var1', 'Var2', 'yes',
-       'STK_ID'].each { |v| expanded << s(:const, v) }
+      # ['a', 'series', 'value', 'step',
+      #  'X', 'Y', 'Z', 'name', 'ffill',
+      #  'Group', 'Var1', 'Var2', 'yes',
+      #  'STK_ID', 'bfill', 
+       ['Var', 'Mean'].each { |v| expanded << s(:const, v) }
     end
     if ty.is_a? RDL::Type::SingletonType
       expanded << s(:const, ty.val)
+    end
+    if ty.is_a? RDL::Type::PreciseStringType
+      expanded << s(:const, ty.vals[0])
     end
     if RDL::Type::NominalType.new(Lambda) <= ty
       expanded << s(:const, NUnique.new)
@@ -69,16 +73,22 @@ class ExpandHolePass < ::AST::Processor
       if ty.params[0] <= RDL::Globals.types[:integer]
         expanded << s(:array, *[0, 2, 4].map { |n| s(:const, n) })
       elsif ty.params[0] <= RDL::Globals.types[:string]
-        expanded << s(:array, *['ID', 'first', 'admit'].map { |n| s(:const, n) })
-        expanded << s(:array, *['type', 'date'].map { |n| s(:const, n) })
-        expanded << s(:array, *['SEGM1', 'Distribuzione Ponderata'].map { |n| s(:const, n) })
-        expanded << s(:array, *['id'].map { |n| s(:const, n) })
-        expanded << s(:array, *['ip', 'useragent'].map { |n| s(:const, n) })
+        # expanded << s(:array, *['ID', 'first', 'admit'].map { |n| s(:const, n) })
+        # expanded << s(:array, *['type', 'date'].map { |n| s(:const, n) })
+        # expanded << s(:array, *['SEGM1', 'Distribuzione Ponderata'].map { |n| s(:const, n) })
+        # expanded << s(:array, *['id'].map { |n| s(:const, n) })
+        # expanded << s(:array, *['ip', 'useragent'].map { |n| s(:const, n) })
+        # expanded << s(:array, *['id1', 'id2'].map { |n| s(:const, n) })
+        # expanded << s(:array, *['col1', 'col2'].map { |n| s(:const, n) })
+        # expanded << s(:array, *['col3'].map { |n| s(:const, n) })
+        # expanded << s(:array, *['doc_created_month', 'doc_created_year', 'speciality'].map { |n| s(:const, n) })
+        # expanded << s(:array, *['Passes', 'Tackles'].map { |n| s(:const, n) })
+        expanded << s(:array, *['a', 'b'].map { |n| s(:const, n) })
       elsif ty.params[0] <= RDL::Globals.types[:bool]
         expanded << s(:array, *[true, false, true].map { |n| s(:const, n) })
         expanded << s(:array, *[true, false].map { |n| s(:const, n) })
-      else
-        raise AbsyntheError, "unhandled type"
+      # else
+      #   raise AbsyntheError, "unhandled type"
       end
     end
 
@@ -102,11 +112,21 @@ class ExpandHolePass < ::AST::Processor
         next unless [:loc_getitem, :__getitem__, :T, :values].include?(mthd)
         trecv = RDL::Type::NominalType.new(cls)
         info[:type].each { |tmeth|
-          next unless tmeth.ret <= ty
+          tret = tmeth.ret
+
+          # self type not supported
+          if tret.is_a? RDL::Type::VarType
+            tret = ty
+            # generic types with only 1 type param supported now
+            trecv = RDL::Type::GenericType.new(trecv, tret)
+          end
+
+          next unless tret <= ty
           # TODO: comptypes not supported yet. See TypeOperations module in RbSyn for impl
           targs = tmeth.args
           next if targs.any? { |t| t.is_a? RDL::Type::BotType }
           tout = tmeth.ret
+          # puts "var type detected" if tout.is_a? RDL::Type::VarType
           # expanded << s(:prop,
           #               s(:hole, nil, ProductDomain.val(PyType.val(trecv), PandasRows.fresh_var)),
           #               mthd,

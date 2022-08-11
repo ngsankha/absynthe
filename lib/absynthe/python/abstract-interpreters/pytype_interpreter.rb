@@ -16,7 +16,8 @@ module Python
         when Integer
           domain.val(RDL::Type::SingletonType.new(konst))
         when String
-          domain.val(RDL::Globals.types[:string])
+          # domain.val(RDL::Globals.types[:string])
+          domain.val(RDL::Type::PreciseStringType.new(konst))
         when NUnique, PyInt
           domain.val(RDL::Type::NominalType.new(konst.class))
         when Symbol
@@ -50,7 +51,16 @@ module Python
         args = node.children[2..].map { |n|
           interpret(env, n)
         }
-        meths = RDL::Globals.info.info[recv.attrs[:ty].to_s]
+
+        trecv = recv.attrs[:ty]
+        if trecv.is_a? RDL::Type::GenericType
+          meths = RDL::Globals.info.info[trecv.base.to_s]
+        elsif trecv.is_a? RDL::Type::NominalType
+          meths = RDL::Globals.info.info[trecv.to_s]
+        else
+          raise AbsyntheError, "unhandled type #{recv}"
+        end
+
         ret_ty = domain.top
 
         meths[meth_name][:type].filter { |ty|
@@ -63,7 +73,15 @@ module Python
           }.all?
 
           if tc
-            ret_ty = domain.val(meth_ty.ret)
+            if meth_ty.ret.is_a? RDL::Type::VarType
+              # assume trecv is GenericType
+              params = RDL::Wrap.get_type_params(trecv.base.to_s)[0]
+              idx = params.index(meth_ty.ret.name)
+              raise RbSynError, "unexpected" if idx.nil?
+              ret_ty = domain.val(trecv.params[idx])
+            else
+              ret_ty = domain.val(meth_ty.ret)
+            end
             break
           end
         }

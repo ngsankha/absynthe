@@ -18,35 +18,47 @@ class DataFrameGroupBy; end
 class NdArray; end
 
 RDL.type_params :Array, [:t], :all?
-RDL.type :DataFrame, :loc_getitem, "(Array<Integer>) -> DataFrame"
-RDL.type :DataFrame, :loc_getitem, "(Lambda) -> DataFrame"
-RDL.type :DataFrame, :xs, "(String, level: Integer) -> DataFrame"
-RDL.type :DataFrame, :pivot, "(columns: String, values: String, index: String) -> DataFrame"
-RDL.type :DataFrame, :sort_values, "(by: Array<String>, ascending: Array<true or false>) -> DataFrame"
-RDL.type :DataFrame, :sort_values, "(Array<String>, ascending: Array<true or false>) -> DataFrame"
-RDL.type :DataFrame, :combine_first, "(DataFrame) -> DataFrame"
-RDL.type :DataFrame, :pivot_table, "(values: String, index: String, columns: String, aggfunc: Lambda) -> DataFrame"
-RDL.type :DataFrame, :pivot_table, "(values: String, index: String, columns: String, aggfunc: String) -> DataFrame"
-RDL.type :DataFrame, :pivot_table, "(values: String, index: String, columns: Array<String>, aggfunc: Lambda) -> DataFrame"
-RDL.type :DataFrame, :merge, "(DataFrame, on: Integer) -> DataFrame"
-RDL.type :DataFrame, :merge, "(DataFrame, on: Array<String>) -> DataFrame"
-RDL.type :DataFrame, :__getitem__, "(Series) -> DataFrame"
-RDL.type :DataFrame, :apply, "(Lambda, axis: 0 or 1) -> Series"
+# RDL.type :DataFrame, :loc_getitem, "(Array<Integer>) -> DataFrame"
+# RDL.type :DataFrame, :loc_getitem, "(Lambda) -> DataFrame"
+# RDL.type :DataFrame, :xs, "(String, level: Integer) -> DataFrame"
+# RDL.type :DataFrame, :pivot, "(columns: String, values: String, index: String) -> DataFrame"
+# RDL.type :DataFrame, :sort_values, "(by: Array<String>, ascending: Array<true or false>) -> DataFrame"
+# RDL.type :DataFrame, :sort_values, "(Array<String>, ascending: Array<true or false>) -> DataFrame"
+# RDL.type :DataFrame, :combine_first, "(DataFrame) -> DataFrame"
+# RDL.type :DataFrame, :pivot_table, "(values: String, index: String, columns: String, aggfunc: Lambda) -> DataFrame"
+# RDL.type :DataFrame, :pivot_table, "(values: String, index: String, columns: String, aggfunc: String) -> DataFrame"
+# RDL.type :DataFrame, :pivot_table, "(values: String, index: String, columns: Array<String>, aggfunc: Lambda) -> DataFrame"
+# RDL.type :DataFrame, :pivot_table, "(values: String, index: Array<String>, columns: Array<String>) -> DataFrame"
+# RDL.type :DataFrame, :merge, "(DataFrame, on: Integer) -> DataFrame"
+# RDL.type :DataFrame, :merge, "(DataFrame, on: Array<String>) -> DataFrame"
+# RDL.type :DataFrame, :__getitem__, "(Series) -> DataFrame"
+# RDL.type :DataFrame, :apply, "(Lambda, axis: 0 or 1) -> Series"
 RDL.type :DataFrame, :query, "(String) -> DataFrame"
-RDL.type :DataFrame, :fillna, "(method: String) -> DataFrame"
-RDL.type :DataFrame, :astype, "(Type) -> DataFrame"
-RDL.type :DataFrame, :stack, "() -> DataFrame"
-RDL.type :DataFrame, :unstack, "() -> DataFrame"
+# RDL.type :DataFrame, :fillna, "(method: String) -> DataFrame"
+# RDL.type :DataFrame, :astype, "(Type) -> DataFrame"
+# RDL.type :DataFrame, :stack, "() -> DataFrame"
+# RDL.type :DataFrame, :unstack, "() -> DataFrame"
 RDL.type :DataFrame, :groupby, "(Array<String>) -> DataFrameGroupBy"
-RDL.type :DataFrameGroupBy, :size, "() -> Series"
-RDL.type :DataFrame, :dropna, '() -> DataFrame'
-RDL.type :DataFrame, :reset_index, '(drop: true or false) -> DataFrame'
-RDL.type :DataFrame, :T, '() -> DataFrameGroupBy'
-RDL.type :DataFrameGroupBy, :reset_index, '() -> DataFrame'
-RDL.type :DataFrame, :values, '() -> NdArray'
-RDL.type :DataFrame, :sum, '(0 or 1, level: Integer) -> DataFrame'
-RDL.type :DataFrame, :div, '(DataFrame, 0 or 1, Integer) -> DataFrame'
-RDL.type :DataFrame, :xs, "(String, 0 or 1, Integer) -> DataFrame"
+# RDL.type :DataFrameGroupBy, :size, "() -> Series"
+# RDL.type :DataFrame, :dropna, '() -> DataFrame'
+# RDL.type :DataFrame, :reset_index, '(drop: true or false) -> DataFrame'
+# RDL.type :DataFrame, :T, '() -> DataFrameGroupBy'
+# RDL.type :DataFrameGroupBy, :reset_index, '() -> DataFrame'
+# RDL.type :DataFrame, :reset_index, '() -> DataFrame'
+# RDL.type :DataFrame, :values, '() -> NdArray'
+# RDL.type :DataFrame, :sum, '(0 or 1, level: Integer) -> DataFrame'
+# RDL.type :DataFrameGroupBy, :sum, '() -> DataFrame'
+# RDL.type :DataFrame, :cumsum, '() -> DataFrame'
+# RDL.type :DataFrame, :div, '(DataFrame, 0 or 1, Integer) -> DataFrame'
+# RDL.type :DataFrame, :xs, "(String, 0 or 1, Integer) -> DataFrame"
+# RDL.type :DataFrame, :__getitem__, "(String) -> DataFrame"
+# RDL.type :DataFrame, :isin, "(Array<Integer>) -> Series"
+# RDL.type :Array, :__getitem__, "(Integer) -> t"
+# RDL.type :DataFrame, :merge, "(DataFrame, how: 'left' or 'right' or 'inner' or 'outer' or 'cross') -> DataFrame"
+# RDL.type :DataFrame, :set_index, "(Array<String>) -> DataFrame"
+# RDL.type :DataFrame, :melt, "(value_vars: Array<String>, var_name: String, value_name: String) -> DataFrame"
+# RDL.type :DataFrame, :groupby, "(String, as_index: true or false) -> DataFrameGroupBy"
+RDL.type :DataFrameGroupBy, :mean, "() -> DataFrame"
 
 $stdout.sync = true
 
@@ -156,6 +168,7 @@ end
 def syn_start(data)
   argsty = data['argsty']
   fnty = RDL::Globals.parser.scan_str("(#{argsty.join(', ')}) -> #{data['outputty']}")
+  # puts fnty
   # rownum_in, rownum_out = parse_rownum(data)
   spec = PythonSpec.new
 
