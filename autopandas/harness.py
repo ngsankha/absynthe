@@ -11,34 +11,34 @@ from pygments.formatters import TerminalFormatter
 from protocol import Protocol, handle_action
 
 benches = [
-  # benchmarks.SO_11881165_depth1(),
-  # benchmarks.SO_11941492_depth1(),
-  # benchmarks.SO_13647222_depth1(),
-  # benchmarks.SO_18172851_depth1(),
-  # benchmarks.SO_49583055_depth1(),
-  # benchmarks.SO_49583055_depth1(),
-  # benchmarks.SO_49592930_depth1(),
-  # benchmarks.SO_49572546_depth1(),
-  # benchmarks.SO_12860421_depth1(), # slow; not in AutoPandas paper
-  # benchmarks.SO_13261175_depth1(),
-  # benchmarks.SO_13793321_depth1(),
-  # benchmarks.SO_14085517_depth1(),
-  # benchmarks.SO_11418192_depth2(),
-  # benchmarks.SO_49567723_depth2(),
-  # benchmarks.SO_49987108_depth2(), # not in AutoPandas paper
-  # benchmarks.SO_13261691_depth2(),
-  # benchmarks.SO_13659881_depth2(),
-  # benchmarks.SO_13807758_depth2(),
-  # benchmarks.SO_34365578_depth2(), # slow
-  # benchmarks.SO_10982266_depth3(), # fail
-  # benchmarks.SO_11811392_depth3(),
-  # benchmarks.SO_49581206_depth3(), # slow
-  # benchmarks.SO_12065885_depth3(), # slow
-  # benchmarks.SO_13576164_depth3(),
-  # benchmarks.SO_14023037_depth3(),
-  # benchmarks.SO_53762029_depth3(),
-  # benchmarks.SO_21982987_depth3(), # not tried
-  # benchmarks.SO_39656670_depth3(),
+  benchmarks.SO_11881165_depth1(),
+  benchmarks.SO_11941492_depth1(),
+  benchmarks.SO_13647222_depth1(),
+  benchmarks.SO_18172851_depth1(),
+  benchmarks.SO_49583055_depth1(),
+  benchmarks.SO_49583055_depth1(),
+  benchmarks.SO_49592930_depth1(),
+  benchmarks.SO_49572546_depth1(),
+  benchmarks.SO_12860421_depth1(), # slow; not in AutoPandas paper
+  benchmarks.SO_13261175_depth1(),
+  benchmarks.SO_13793321_depth1(),
+  benchmarks.SO_14085517_depth1(),
+  benchmarks.SO_11418192_depth2(),
+  benchmarks.SO_49567723_depth2(),
+  benchmarks.SO_49987108_depth2(), # not in AutoPandas paper
+  benchmarks.SO_13261691_depth2(),
+  benchmarks.SO_13659881_depth2(),
+  benchmarks.SO_13807758_depth2(),
+  benchmarks.SO_34365578_depth2(), # slow
+  benchmarks.SO_10982266_depth3(), # fail
+  benchmarks.SO_11811392_depth3(),
+  benchmarks.SO_49581206_depth3(), # slow
+  benchmarks.SO_12065885_depth3(), # slow
+  benchmarks.SO_13576164_depth3(),
+  benchmarks.SO_14023037_depth3(),
+  benchmarks.SO_53762029_depth3(),
+  benchmarks.SO_21982987_depth3(), # not tried
+  benchmarks.SO_39656670_depth3(),
   benchmarks.SO_23321300_depth3()
 ]
 random.shuffle(benches)

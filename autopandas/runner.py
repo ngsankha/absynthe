@@ -42,6 +42,36 @@ class Abstraction:
         out = Abstraction._infer_rownum(b.output)
         return [inp, out]
 
+    def index2const(index):
+        consts = []
+        if type(index) in [pd.Index, pd.Int64Index, pd.DatetimeIndex] :
+            consts.extend(list(index))
+        elif type(index) == pd.RangeIndex:
+            consts.extend(range(index.start, index.stop, index.step))
+        elif type(index) == pd.MultiIndex:
+            consts.extend(flatten(list(index)))
+        else:
+            print(index)
+            raise RuntimeError("Unhandled index: " + str(type(index)))
+
+        if index.name is not None:
+            consts.append(index.name)
+        if index.names is not None:
+            consts.extend(list(index.names))
+
+        return filter(lambda v: v is not None, consts)
+
+    def consts(b):
+        filtered_vals = list(filter(lambda v: isinstance(v, pd.DataFrame), b.inputs + [b.output]))
+        val_indexes = map(Abstraction.index2const, map(lambda v: v.index, filtered_vals))
+        val_columns = map(Abstraction.index2const, map(lambda v: v.columns, filtered_vals))
+
+        consts = flatten(list(val_indexes) + list(val_columns))
+
+        # NOTE: only support int and strings in JSON serialization
+        supported_consts = filter(lambda v: type(v) in [int, str], consts)
+        return set(supported_consts)
+
     def all(b):
         tyin, tyout = Abstraction.types(b)
         # rownumin, rownumout = Abstraction.rownums(b)
@@ -50,6 +80,7 @@ class Abstraction:
             'outputty': tyout,
             # 'rownumin': rownumin,
             # 'rownumout': rownumout
+            'consts': Abstraction.consts(b)
         }
 
 class Benchmark:

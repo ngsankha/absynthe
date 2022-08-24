@@ -27,11 +27,7 @@ class ExpandHolePass < ::AST::Processor
     # consts
     # TODO: fix constants
     if RDL::Globals.types[:string] <= ty
-      # ['a', 'series', 'value', 'step',
-      #  'X', 'Y', 'Z', 'name', 'ffill',
-      #  'Group', 'Var1', 'Var2', 'yes',
-      #  'STK_ID', 'bfill', 
-       ['Var', 'Mean'].each { |v| expanded << s(:const, v) }
+      @ctx.consts[:str].each { |v| expanded << s(:const, v) }
     end
     if ty.is_a? RDL::Type::SingletonType
       expanded << s(:const, ty.val)
@@ -46,7 +42,7 @@ class ExpandHolePass < ::AST::Processor
       expanded << s(:const, PyInt.new)
     end
     if RDL::Globals.types[:integer] <= ty
-      [0, 1, 10].each { |v| expanded << s(:const, v) }
+      @ctx.consts[:int].each { |v| expanded << s(:const, v) }
     end
 
     # union type
@@ -69,21 +65,21 @@ class ExpandHolePass < ::AST::Processor
     #         .to_a.map { |n| s(:const, n) })
     #   end
     # end
+
+    # NOTE: all arrays are limited to max size 3 for now
     if ty.is_a?(RDL::Type::GenericType) && ty.base == RDL::Globals.types[:array]
       if ty.params[0] <= RDL::Globals.types[:integer]
-        expanded << s(:array, *[0, 2, 4].map { |n| s(:const, n) })
+        3.times { |i|
+          @ctx.consts[:int].permutation(i + 1) { |arr|
+            expanded << s(:array, *arr.map { |n| s(:const, n) })
+          }
+        }
       elsif ty.params[0] <= RDL::Globals.types[:string]
-        # expanded << s(:array, *['ID', 'first', 'admit'].map { |n| s(:const, n) })
-        # expanded << s(:array, *['type', 'date'].map { |n| s(:const, n) })
-        # expanded << s(:array, *['SEGM1', 'Distribuzione Ponderata'].map { |n| s(:const, n) })
-        # expanded << s(:array, *['id'].map { |n| s(:const, n) })
-        # expanded << s(:array, *['ip', 'useragent'].map { |n| s(:const, n) })
-        # expanded << s(:array, *['id1', 'id2'].map { |n| s(:const, n) })
-        # expanded << s(:array, *['col1', 'col2'].map { |n| s(:const, n) })
-        # expanded << s(:array, *['col3'].map { |n| s(:const, n) })
-        # expanded << s(:array, *['doc_created_month', 'doc_created_year', 'speciality'].map { |n| s(:const, n) })
-        # expanded << s(:array, *['Passes', 'Tackles'].map { |n| s(:const, n) })
-        expanded << s(:array, *['a', 'b'].map { |n| s(:const, n) })
+        3.times { |i|
+          @ctx.consts[:str].permutation(i + 1) { |arr|
+            expanded << s(:array, *arr.map { |n| s(:const, n) })
+          }
+        }
       elsif ty.params[0] <= RDL::Globals.types[:bool]
         expanded << s(:array, *[true, false, true].map { |n| s(:const, n) })
         expanded << s(:array, *[true, false].map { |n| s(:const, n) })
