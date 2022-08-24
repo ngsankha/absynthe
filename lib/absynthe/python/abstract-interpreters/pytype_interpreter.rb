@@ -44,7 +44,7 @@ module Python
         item0 = node.children[0]
         v = interpret(env, item0)
         node.children[1..].each { |k| v = domain.val(RDL::Type::UnionType.new(v.attrs[:ty], interpret(env, k).attrs[:ty])) }
-        domain.val(RDL::Type::GenericType.new(RDL::Globals.types[:array], v.attrs[:ty].canonical))
+        domain.val(RDL::Type::GenericType.new(RDL::Globals.types[:array], v.attrs[:ty].canonical)).promote
       when :prop, :send
         recv = interpret(env, node.children[0])
         meth_name = node.children[1]

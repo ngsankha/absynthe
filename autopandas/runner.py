@@ -80,7 +80,7 @@ class Abstraction:
             'outputty': tyout,
             # 'rownumin': rownumin,
             # 'rownumout': rownumout
-            'consts': Abstraction.consts(b)
+            'consts': list(Abstraction.consts(b))
         }
 
 class Benchmark:

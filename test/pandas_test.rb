@@ -94,6 +94,18 @@ class PandasTest < Minitest::Test
     assert_equal pytype.attrs[:ty], ty
   end
 
+  def test_promote_pytype_3
+    ty = RDL::Type::GenericType.new(
+      RDL::Globals.types[:array],
+        RDL::Type::SingletonType.new(1))
+    pytype = PyType.val(ty).promote
+
+    assert_equal pytype.attrs[:ty],
+                 RDL::Type::GenericType.new(
+                  RDL::Globals.types[:array],
+                  RDL::Globals.types[:integer])
+  end
+
   def test_generic_pytype
     RDL.type :Array, :__getitem__, "(Integer) -> t"
 

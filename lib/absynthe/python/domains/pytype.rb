@@ -34,6 +34,8 @@ class PyType < AbstractDomain
         ty.val.is_a?(Integer) }
         return RDL::Globals.types[:integer]
       end
+    elsif rdl_ty.is_a?(RDL::Type::SingletonType) && rdl_ty.val.is_a?(Integer)
+      return RDL::Globals.types[:integer]
     end
 
     rdl_ty
