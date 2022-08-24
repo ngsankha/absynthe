@@ -190,11 +190,13 @@ def syn_start(data)
   seed = s(:hole, nil, ctx.goal)
   q = FastContainers::PriorityQueue.new(:min)
   q.push(seed, ProgSizePass.prog_size(seed))
-  prog = synthesize(ctx, spec, q)
-  Protocol.write({
-    action: 'done',
-    prog: PyLang::unparse(prog)
-  })
+  Timeout::timeout(20 * 60) do
+    prog = synthesize(ctx, spec, q)
+    Protocol.write({
+      action: 'done',
+      prog: PyLang::unparse(prog)
+    })
+  end
 end
 
 def handle_action(data)
