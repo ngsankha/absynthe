@@ -50,28 +50,27 @@ def pprint_color(obj):
 for bench in benches:
   print(type(bench).__name__)
   try:
-    data = bench.absynthe_input()
-    data['action'] = 'start'
-
-    proc = subprocess.Popen(['bundle', 'exec', 'bin/autopandas'],
-                            stdout=subprocess.PIPE,
-                            stdin=subprocess.PIPE,
-                            # stderr=subprocess.PIPE,
-                            cwd=r'..')
-    p = Protocol(proc, log=True)
-    start_time = time.perf_counter()
-    p.write(data)
-
     with warnings.catch_warnings():
       warnings.simplefilter("ignore")
-      pprint_color(handle_action(p, bench))
-    end_time = time.perf_counter()
-    print(end_time - start_time)
+      data = bench.absynthe_input()
+      data['action'] = 'start'
 
-    proc.wait()
-    proc.stdin.close()
-    proc.stdout.close()
-    # proc.stderr.close()
+      proc = subprocess.Popen(['bundle', 'exec', 'bin/autopandas'],
+                              stdout=subprocess.PIPE,
+                              stdin=subprocess.PIPE,
+                              # stderr=subprocess.PIPE,
+                              cwd=r'..')
+      p = Protocol(proc, log=True)
+      start_time = time.perf_counter()
+      p.write(data)
+      pprint_color(handle_action(p, bench))
+      end_time = time.perf_counter()
+      print(end_time - start_time)
+
+      proc.wait()
+      proc.stdin.close()
+      proc.stdout.close()
+      # proc.stderr.close()
   except:
     print("ERROR!")
     print(sys.exc_info())
