@@ -1,6 +1,6 @@
 class Context
-  attr_reader :max_size, :init_env, :goal, :consts
-  attr_accessor :lang, :domain, :cache, :score
+  attr_reader :init_env, :goal, :consts
+  attr_accessor :lang, :domain, :cache, :score, :max_size
   def initialize(init_env, goal)
     @max_size = 25
     @domain = init_env.first[1].class

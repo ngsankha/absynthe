@@ -186,6 +186,8 @@ def syn_start(data)
   ctx.score = Proc.new { |prog| WeightedSizePass.prog_size(prog) }
   ctx.consts[:int] = consts.filter { |k| k.is_a? Integer }
   ctx.consts[:str] = consts.filter { |k| k.is_a? String }
+  ctx.max_size = data['seqs']
+  # puts "==> #{ctx.max_size}"
 
   seed = s(:hole, nil, ctx.goal)
   q = FastContainers::PriorityQueue.new(:min)

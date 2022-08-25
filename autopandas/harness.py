@@ -5,6 +5,7 @@ import unittest
 import warnings
 import time
 import random
+import sys
 from pygments import highlight
 from pygments.lexers import PythonLexer
 from pygments.formatters import TerminalFormatter

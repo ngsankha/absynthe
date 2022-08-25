@@ -15,7 +15,6 @@ require 'absynthe/passes/expand_hole'
 require 'absynthe/passes/replace_dephole'
 require 'absynthe/passes/extract_ast'
 require 'absynthe/passes/hole_count'
-require 'absynthe/passes/prog_size'
 
 class AbsyntheError < StandardError; end
 

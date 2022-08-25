@@ -1,3 +1,4 @@
+require 'absynthe/passes/func_count'
 require 'absynthe/passes/py_expand_hole'
 require 'absynthe/python/domains/pytype'
 require 'absynthe/python/domains/pandas_rows'
