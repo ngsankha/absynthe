@@ -183,7 +183,7 @@ def syn_start(data)
   ctx.lang = :py
   # ctx.domain = ProductDomain
   ctx.domain = PyType
-  ctx.score = Proc.new { |prog| ProgSizePass.prog_size(prog) }
+  ctx.score = Proc.new { |prog| WeightedSizePass.prog_size(prog) }
   ctx.consts[:int] = consts.filter { |k| k.is_a? Integer }
   ctx.consts[:str] = consts.filter { |k| k.is_a? String }
   ctx.max_size = data['seqs']

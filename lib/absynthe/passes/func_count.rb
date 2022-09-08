@@ -1,10 +1,10 @@
 require 'ast'
 
-class WeightedSizePass < ::AST::Processor
+class ProgSizePass < ::AST::Processor
   attr_reader :size
 
   def self.prog_size(node)
-    visitor = WeightedSizePass.new
+    visitor = ProgSizePass.new
     visitor.process(node)
     visitor.size
   end
@@ -14,7 +14,7 @@ class WeightedSizePass < ::AST::Processor
   end
 
   def on_prop(node)
-    @size += 3
+    @size += 1
     node.children.map { |k|
       k.is_a?(Parser::AST::Node) ? process(k) : k
     }
@@ -23,7 +23,6 @@ class WeightedSizePass < ::AST::Processor
   alias :on_send :on_prop
 
   def handler_missing(node)
-    @size += 1
     node.children.map { |k|
       k.is_a?(Parser::AST::Node) ? process(k) : k
     }
