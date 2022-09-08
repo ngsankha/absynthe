@@ -1,10 +1,10 @@
 require 'ast'
 
-class WeightedSizePass < ::AST::Processor
+class ProgSizePass < ::AST::Processor
   attr_reader :size
 
   def self.prog_size(node)
-    visitor = WeightedSizePass.new
+    visitor = ProgSizePass.new
     visitor.process(node)
     visitor.size
   end

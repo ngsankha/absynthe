@@ -74,21 +74,36 @@ class Abstraction:
 
     def cols_inp(b):
         idx = 0
-        ret = {}
-        df_inps = map(lambda x: x.columns, filter(lambda x: type(x) == DataFrame, b.inputs))
-        for i in df_inps:
-            
+        colmap = {}
+        for i in b.inputs:
+            if type(i) == pd.DataFrame:
+                colmap["arg{}".format(idx)] = i.columns
+            else:
+                colmap["arg{}".format(idx)] = 'bot'
+            idx += 1
+
+        for i in range(idx):
+            replaced = False
+            for j in range(i):
+                if type(colmap["arg{}".format(j)]) == type(colmap["arg{}".format(i)]) == pd.DataFrame:
+                    if colmap["arg{}".format(i)].equals(colmap["arg{}".format(j)]):
+                        colmap["arg{}".format(i)] = colmap["arg{}".format(j)]
+                        replaced = True
+            if not replaced:
+                colmap["arg{}".format(i)] = "df{}".format(i)
+        print(colmap)
 
 
     def all(b):
         tyin, tyout = Abstraction.types(b)
         # rownumin, rownumout = Abstraction.rownums(b)
+        Abstraction.cols_inp(b)
         return {
             'argsty': tyin,
             'outputty': tyout,
             # 'rownumin': rownumin,
             # 'rownumout': rownumout,
-            'cols_same': Abstraction.cols_same(b),
+            # 'cols_same': Abstraction.cols_same(b),
             'consts': list(Abstraction.consts(b)),
             'seqs': len(b.seqs[0])
         }
