@@ -8,7 +8,7 @@ class ProductDomain < AbstractDomain
 
   @@classes = [
     PyType,
-    PandasRows
+    PandasCols
   ]
 
   def initialize(variant, domains)

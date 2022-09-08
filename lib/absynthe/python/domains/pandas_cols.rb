@@ -1,6 +1,6 @@
 require 'set'
 
-class PandasRows < AbstractDomain
+class PandasCols < AbstractDomain
   attr_reader :attrs, :variant
 
   private_class_method :new
@@ -26,6 +26,10 @@ class PandasRows < AbstractDomain
     result.glb = @@bot
     result.lub = @@top
     result
+  end
+
+  def self.val(xs)
+    new(:val, cols: xs.to_set)
   end
 
   def top?
@@ -70,6 +74,16 @@ class PandasRows < AbstractDomain
       "?#{@attrs[:name]}"
     else
       raise AbsyntheError, "Unexpected!"
+    end
+  end
+
+  def union(other)
+    if bot? && other.bot?
+      self.bot
+    elsif val? && other.val?
+      self.val(lhs.attrs[:cols].union(rhs.attrs[:cols]))
+    else
+      self.top
     end
   end
 end

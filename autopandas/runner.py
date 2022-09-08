@@ -72,6 +72,14 @@ class Abstraction:
         supported_consts = filter(lambda v: type(v) in [int, str], consts)
         return set(supported_consts)
 
+    def cols_inp(b):
+        idx = 0
+        ret = {}
+        df_inps = map(lambda x: x.columns, filter(lambda x: type(x) == DataFrame, b.inputs))
+        for i in df_inps:
+            
+
+
     def all(b):
         tyin, tyout = Abstraction.types(b)
         # rownumin, rownumout = Abstraction.rownums(b)
@@ -79,7 +87,8 @@ class Abstraction:
             'argsty': tyin,
             'outputty': tyout,
             # 'rownumin': rownumin,
-            # 'rownumout': rownumout
+            # 'rownumout': rownumout,
+            'cols_same': Abstraction.cols_same(b),
             'consts': list(Abstraction.consts(b)),
             'seqs': len(b.seqs[0])
         }
