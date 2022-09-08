@@ -18,8 +18,10 @@ module Python
         when Symbol
           # assume all environment maps to abstract values
           env[konst]
+        when NUnique
+          domain.bot
         else
-          raise AbsyntheError, "unexpected constant type"
+          raise AbsyntheError, "unexpected constant type #{konst.inspect}"
         end
       when :array
         node.children.reduce(interpret(env, node.children[0])) { |u, n|
@@ -28,9 +30,9 @@ module Python
       when :prop
         recv = interpret(env, node.children[0])
         prop = node.children[1]
-        arg  = interpret(env, node.children[2])
         case prop
         when :loc_getitem
+          arg  = interpret(env, node.children[2])
           arg
         when :__getitem__
           domain.top
@@ -44,13 +46,13 @@ module Python
       when :send
         recv = interpret(env, node.children[0])
         meth = node.children[1]
-        arg1  = interpret(env, node.children[2])
         case meth
         when :apply
           recv
         when :astype
           recv
         when :combine_first
+          arg1  = interpret(env, node.children[2])
           recv.union(arg1)
         when :cumsum
           recv

@@ -154,35 +154,35 @@ class PyLang
   end
 end
 
-def parse_rownum(data)
-  [data['rownumin'].map { |n|
-      if n == "top"
-        PandasRows.top
+def parse_cols(data)
+  [data['colin'].map { |n|
+      if n == "bot"
+        PandasCols.bot
       else
-        PandasRows.val(n)
+        PandasCols.var(n)
       end
     },
-   PandasRows.val(data['rownumout'])]
+   PandasCols.var(data['colout'])]
 end
 
 def syn_start(data)
   consts = data['consts']
   argsty = data['argsty']
   fnty = RDL::Globals.parser.scan_str("(#{argsty.join(', ')}) -> #{data['outputty']}")
-  # puts fnty
-  # rownum_in, rownum_out = parse_rownum(data)
+  col_in, col_out = parse_cols(data)
   spec = PythonSpec.new
 
   tyargs = fnty.args.map { |ty| PyType.val(ty) }
 
-  # abs_env = tyargs.zip(rownum_in).each_with_index.map { |arg, i| ["arg#{i}".to_sym,
-  #   ProductDomain.val(arg[0], arg[1])]}.to_h
-  abs_env = tyargs.each_with_index.map { |arg, i| ["arg#{i}".to_sym, arg]}.to_h
-  # ctx = Context.new(abs_env, ProductDomain.val(PyType.val(fnty.ret), rownum_out))
-  ctx = Context.new(abs_env, PyType.val(fnty.ret))
+  abs_env = tyargs.zip(col_in).each_with_index.map { |arg, i|
+      ["arg#{i}".to_sym, ProductDomain.val(arg[0], arg[1])]
+    }.to_h
+  # abs_env = tyargs.each_with_index.map { |arg, i| ["arg#{i}".to_sym, arg]}.to_h
+  ctx = Context.new(abs_env, ProductDomain.val(PyType.val(fnty.ret), col_out))
+  # ctx = Context.new(abs_env, PyType.val(fnty.ret))
   ctx.lang = :py
-  # ctx.domain = ProductDomain
-  ctx.domain = PyType
+  ctx.domain = ProductDomain
+  # ctx.domain = PyType
   ctx.score = Proc.new { |prog| WeightedSizePass.prog_size(prog) }
   ctx.consts[:int] = consts.filter { |k| k.is_a? Integer }
   ctx.consts[:str] = consts.filter { |k| k.is_a? String }
@@ -205,7 +205,6 @@ def handle_action(data)
   case data['action']
   when 'start'
     syn_start(data)
-    puts data
   when 'test_res'
     data['res']
   else

@@ -48,7 +48,7 @@ class ExpandHolePass < ::AST::Processor
     # union type
     if ty.is_a? RDL::Type::UnionType
       ty.types.each { |t|
-        expanded << s(:hole, nil, PyType.val(t))
+        expanded << s(:hole, nil, ProductDomain.val(PyType.val(t), PandasCols.fresh_var))
       }
     end
 
@@ -83,7 +83,7 @@ class ExpandHolePass < ::AST::Processor
         keys = ty.elts.keys.combination(i + 1)
         keys.each { |ks|
           expanded << s(:hash, *ks.map { |k|
-                        s(:key, k, s(:hole, nil, PyType.val(ty.elts[k])))
+                        s(:key, k, s(:hole, nil, ProductDomain.val(PyType.val(ty.elts[k]), PandasCols.fresh_var)))
                       })
         }
       }
@@ -113,10 +113,10 @@ class ExpandHolePass < ::AST::Processor
           tout = tmeth.ret
 
           expanded << s(:prop,
-                        s(:hole, nil, PyType.val(trecv)),
+                        s(:hole, nil, ProductDomain.val(PyType.val(trecv), PandasCols.fresh_var)),
                         mthd,
                         *targs.map { |t|
-                          s(:hole, nil, PyType.val(t))
+                          s(:hole, nil, ProductDomain.val(PyType.val(t), PandasCols.fresh_var))
                         })
         }
       }
@@ -137,9 +137,9 @@ class ExpandHolePass < ::AST::Processor
           targs = tmeth.args
           arg_terms = targs.map { |arg|
             if [RDL::Type::NominalType, RDL::Type::GenericType, RDL::Type::UnionType].any? { |t| arg.is_a? t }
-              s(:hole, nil, PyType.val(arg))
+              s(:hole, nil, ProductDomain.val(PyType.val(arg), PandasCols.fresh_var))
             elsif arg.is_a? RDL::Type::FiniteHashType
-              s(:hole, nil, PyType.val(arg))
+              s(:hole, nil, ProductDomain.val(PyType.val(arg), PandasCols.fresh_var))
             else
               raise AbsyntheError, "unexpected type #{arg}"
             end
@@ -147,7 +147,7 @@ class ExpandHolePass < ::AST::Processor
           next if targs.any? { |t| t.is_a? RDL::Type::BotType }
           tout = tmeth.ret
           expanded << s(:send,
-                        s(:hole, nil, PyType.val(trecv)),
+                        s(:hole, nil, ProductDomain.val(PyType.val(trecv), PandasCols.fresh_var)),
                         mthd,
                         *arg_terms)
         }

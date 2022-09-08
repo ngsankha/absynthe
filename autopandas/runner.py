@@ -82,7 +82,18 @@ class Abstraction:
                 colmap["arg{}".format(idx)] = 'bot'
             idx += 1
 
+        if type(b.output) == pd.DataFrame:
+            outcol = "outcol"
+            for i in range(idx):
+                if type(colmap["arg{}".format(i)]) is not str and colmap["arg{}".format(i)].equals(b.output.columns):
+                    outcol = "df{}".format(i)
+        else:
+            outcol = 'bot'
+
         for i in range(idx):
+            if type(colmap["arg{}".format(i)]) == str:
+                continue
+
             replaced = False
             for j in range(i):
                 if type(colmap["arg{}".format(j)]) == type(colmap["arg{}".format(i)]) == pd.DataFrame:
@@ -91,19 +102,24 @@ class Abstraction:
                         replaced = True
             if not replaced:
                 colmap["arg{}".format(i)] = "df{}".format(i)
-        print(colmap)
 
+        args = []
+        for i in range(idx):
+            args.append(colmap["arg{}".format(i)])
+
+        return (args, outcol)
 
     def all(b):
         tyin, tyout = Abstraction.types(b)
         # rownumin, rownumout = Abstraction.rownums(b)
-        Abstraction.cols_inp(b)
+        colin, colout = Abstraction.cols_inp(b)
         return {
             'argsty': tyin,
             'outputty': tyout,
             # 'rownumin': rownumin,
             # 'rownumout': rownumout,
-            # 'cols_same': Abstraction.cols_same(b),
+            'colin': colin,
+            'colout': colout,
             'consts': list(Abstraction.consts(b)),
             'seqs': len(b.seqs[0])
         }

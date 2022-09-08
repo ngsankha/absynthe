@@ -79,11 +79,11 @@ class PandasCols < AbstractDomain
 
   def union(other)
     if bot? && other.bot?
-      self.bot
+      PandasCols.bot
     elsif val? && other.val?
-      self.val(lhs.attrs[:cols].union(rhs.attrs[:cols]))
+      PandasCols.val(lhs.attrs[:cols].union(rhs.attrs[:cols]))
     else
-      self.top
+      PandasCols.top
     end
   end
 end
