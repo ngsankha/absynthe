@@ -159,7 +159,7 @@ def parse_cols(data)
       if n == "bot"
         PandasCols.bot
       else
-        PandasCols.var(n)
+        PandasCols.val(n)
       end
     },
    PandasCols.var(data['colout'])]

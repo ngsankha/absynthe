@@ -28,8 +28,8 @@ class PandasCols < AbstractDomain
     result
   end
 
-  def self.val(xs)
-    new(:val, cols: xs.to_set)
+  def self.val(name)
+    new(:val, name: name)
   end
 
   def top?
@@ -45,11 +45,11 @@ class PandasCols < AbstractDomain
   end
 
   def val?
-    false
+    @variant == :val
   end
 
   def val_leq(lhs, rhs)
-    raise AbsyntheError, "unimplemented"
+    lhs.attrs[:name] == rhs.attrs[:name]
   end
 
   def var_leq(lhs, rhs)
@@ -80,8 +80,8 @@ class PandasCols < AbstractDomain
   def union(other)
     if bot? && other.bot?
       PandasCols.bot
-    elsif val? && other.val?
-      PandasCols.val(lhs.attrs[:cols].union(rhs.attrs[:cols]))
+    # elsif val? && other.val?
+    #   PandasCols.val(lhs.attrs[:cols].union(rhs.attrs[:cols]))
     else
       PandasCols.top
     end

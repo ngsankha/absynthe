@@ -88,7 +88,7 @@ class AbstractDomain
         raise AbsyntheError, "Unknown abstract value variant"
       end
     else
-      raise AbsyntheError, "Unknown abstract value variant"
+      raise AbsyntheError, "Unknown abstract value variant #{lhs.variant}"
     end
   end
 
