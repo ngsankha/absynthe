@@ -48,34 +48,38 @@ random.shuffle(benches)
 def pprint_color(obj):
     print(highlight(obj, PythonLexer(), TerminalFormatter()))
 
-for bench in benches:
-  print(type(bench).__name__)
-  try:
-    with warnings.catch_warnings():
-      warnings.simplefilter("ignore")
-      data = bench.absynthe_input()
-      data['action'] = 'start'
-      env = os.environ
-      env['RUBYOPT'] = '-W0'
+def run_benchmarks(benches):
+  for bench in benches:
+    print(type(bench).__name__)
+    try:
+      with warnings.catch_warnings():
+        warnings.simplefilter("ignore")
+        data = bench.absynthe_input()
+        data['action'] = 'start'
+        env = os.environ
+        env['RUBYOPT'] = '-W0'
 
 
-      proc = subprocess.Popen(['bundle', 'exec', 'bin/autopandas'],
-                              stdout=subprocess.PIPE,
-                              stdin=subprocess.PIPE,
-                              # stderr=subprocess.PIPE,
-                              cwd=r'..',
-                              env=env)
-      p = Protocol(proc, log=True)
-      start_time = time.perf_counter()
-      p.write(data)
-      pprint_color(handle_action(p, bench))
-      end_time = time.perf_counter()
-      print(end_time - start_time)
+        proc = subprocess.Popen(['bundle', 'exec', 'bin/autopandas'],
+                                stdout=subprocess.PIPE,
+                                stdin=subprocess.PIPE,
+                                # stderr=subprocess.PIPE,
+                                cwd=r'..',
+                                env=env)
+        p = Protocol(proc, log=True)
+        start_time = time.perf_counter()
+        p.write(data)
+        pprint_color(handle_action(p, bench))
+        end_time = time.perf_counter()
+        print(end_time - start_time)
 
-      proc.wait()
-      proc.stdin.close()
-      proc.stdout.close()
-      # proc.stderr.close()
-  except:
-    print("ERROR!")
-    print(sys.exc_info())
+        proc.wait()
+        proc.stdin.close()
+        proc.stdout.close()
+        # proc.stderr.close()
+    except:
+      print("ERROR!")
+      print(sys.exc_info())
+
+if __name__ == '__main__':
+  run_benchmarks(benches)
