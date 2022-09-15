@@ -50,4 +50,4 @@ def collect(output_file, times, **opts):
     with open(output_file, 'w') as out:
         json.dump(merged, out)
 
-collect('base_data.json', int(args.times))
+collect('sygus_data.json', int(args.times))

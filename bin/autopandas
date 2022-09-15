@@ -166,6 +166,7 @@ def parse_cols(data)
 end
 
 def syn_start(data)
+  start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
   consts = data['consts']
   argsty = data['argsty']
   fnty = RDL::Globals.parser.scan_str("(#{argsty.join(', ')}) -> #{data['outputty']}")
@@ -192,11 +193,22 @@ def syn_start(data)
   seed = s(:hole, nil, ctx.goal)
   q = FastContainers::PriorityQueue.new(:min)
   q.push(seed, ProgSizePass.prog_size(seed))
-  Timeout::timeout(20 * 60) do
-    prog = synthesize(ctx, spec, q)
+  begin
+    Timeout::timeout(20 * 60) do
+      prog = synthesize(ctx, spec, q)
+      end_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      Protocol.write({
+        action: 'done',
+        time: end_time - start_time,
+        specs: 1,
+        tested_progs: Instrumentation.tested_progs,
+        size: PyProgSizePass.prog_size(prog),
+        prog: PyLang::unparse(prog)
+      })
+    end
+  rescue Timeout::Error
     Protocol.write({
-      action: 'done',
-      prog: PyLang::unparse(prog)
+      action: 'timeout'
     })
   end
 end

@@ -27,7 +27,7 @@ class Protocol:
     self.proc.stdin.write((txt + "\n").encode("UTF-8"))
     self.proc.stdin.flush()
 
-
+# TODO: convert to `Action` objects for better handling of the return value
 def handle_action(protocol, bench):
   while True:
     data = protocol.read()
@@ -35,6 +35,9 @@ def handle_action(protocol, bench):
       res = bench.test_candidate(data['prog'])
       protocol.write({'action': 'test_res', 'res': res})
     elif data['action'] == 'done':
-      return data['prog']
+      data.pop('action', None)
+      return data
+    elif data['action'] == 'timeout':
+      return None
     else:
       raise Exception("Unexpected RPC message")

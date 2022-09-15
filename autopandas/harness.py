@@ -48,9 +48,16 @@ random.shuffle(benches)
 def pprint_color(obj):
     print(highlight(obj, PythonLexer(), TerminalFormatter()))
 
-def run_benchmarks(benches):
+def run_benchmarks(benches, ignore_list):
+  skips = []
+  results = {}
   for bench in benches:
     print(type(bench).__name__)
+
+    if bench in ignore_list:
+      print('SKIPPED!')
+      continue
+
     try:
       with warnings.catch_warnings():
         warnings.simplefilter("ignore")
@@ -67,12 +74,15 @@ def run_benchmarks(benches):
                                 cwd=r'..',
                                 env=env)
         p = Protocol(proc, log=True)
-        start_time = time.perf_counter()
         p.write(data)
-        pprint_color(handle_action(p, bench))
-        end_time = time.perf_counter()
-        print(end_time - start_time)
-
+        final_out = handle_action(p, bench)
+        if final_out is None: # timeout
+          skips.append(bench)
+        else:
+          prog = final_out['prog']
+          pprint_color(prog)
+          print(final_out['time'])
+          results[type(bench).__name__] = final_out
         proc.wait()
         proc.stdin.close()
         proc.stdout.close()
@@ -80,6 +90,8 @@ def run_benchmarks(benches):
     except:
       print("ERROR!")
       print(sys.exc_info())
+
+  return (results, skips)
 
 if __name__ == '__main__':
   run_benchmarks(benches)
