@@ -14,7 +14,7 @@ class WeightedSizePass < ::AST::Processor
   end
 
   def on_prop(node)
-    @size += 3
+    @size += 5
     node.children.map { |k|
       k.is_a?(Parser::AST::Node) ? process(k) : k
     }
