@@ -108,9 +108,13 @@ class AbstractDomain
       else
         new_glb = rhs.glb
         new_lub = rhs.lub
-        if lhs.glb <= new_glb and new_lub <= rhs.lub
-          lhs.glb = new_glb
-          lhs.lub = new_lub
+        if rhs.glb <= lhs.glb and lhs.lub <= rhs.lub
+          rhs.glb = lhs.glb
+          rhs.lub = lhs.lub
+          true
+        elsif lhs.glb <= rhs.glb and rhs.lub <= lhs.lub
+          lhs.glb = rhs.glb
+          lhs.lub = rhs.lub
           true
         else
           false
