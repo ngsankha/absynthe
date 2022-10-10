@@ -67,6 +67,7 @@ class Abstraction:
         val_columns = map(Abstraction.index2const, map(lambda v: v.columns, filtered_vals))
 
         consts = flatten(list(val_indexes) + list(val_columns))
+        consts.append(0)
 
         # NOTE: only support int and strings in JSON serialization
         supported_consts = filter(lambda v: type(v) in [int, str], consts)
