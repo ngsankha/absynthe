@@ -16,9 +16,9 @@ parser.add_argument('--smallbench', dest='benchtype', action='store_const',
 
 args = parser.parse_args()
 
-if str(args.benchtype) == 'smallbench':
-    print("Small bench not supported yet!")
-    sys.exit(0)
+# if str(args.benchtype) == 'smallbench':
+#     print("Small bench not supported yet!")
+#     sys.exit(0)
 
 ABSYNTHE_PATH = '..'
 MY_CWD = os.getcwd()
@@ -27,6 +27,7 @@ JSON_LOG_FILE = 'test_log.json'
 def benchmark(**opts):
     local.cwd.chdir(ABSYNTHE_PATH)
     bundle.with_env(**opts)['exec', 'rake', str(args.benchtype)] & TF(FG=True)
+    local.cwd.chdir('scripts')
 
 def collect(output_file, times, **opts):
     merged = None
