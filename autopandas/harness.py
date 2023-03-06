@@ -94,4 +94,4 @@ def run_benchmarks(benches, ignore_list):
   return (results, skips)
 
 if __name__ == '__main__':
-  run_benchmarks(benches)
+  run_benchmarks(benches, [])
