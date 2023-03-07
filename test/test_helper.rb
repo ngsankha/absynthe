@@ -37,10 +37,14 @@ module SygusTestRunner
         ctx = Context.new(abs_env, target_abs)
         Globals.root_vars = ctx.init_env.values.filter { |v| v.var? }
 
-        ctx.cache = Cache.populate_sygus(ctx, lang)
+        ctx.cache = Cache.populate_sygus(ctx, lang) unless ENV['NO_CACHE']
 
-        tinfer = TemplateInfer.new(ctx, constraints, spec.args)
-        seed = tinfer.infer
+        unless ENV['TEMPLATE_INFER']
+          tinfer = TemplateInfer.new(ctx, constraints, spec.args)
+          seed = tinfer.infer
+        else
+          seed = nil
+        end
         seed ||= s(:hole, :Start, ctx.goal)
         # seed = s(:hole, :Start, ctx.goal)
         q = FastContainers::PriorityQueue.new(:min)

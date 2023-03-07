@@ -27,7 +27,7 @@ JSON_LOG_FILE = 'test_log.json'
 def benchmark(**opts):
     local.cwd.chdir(ABSYNTHE_PATH)
     bundle.with_env(**opts)['exec', 'rake', str(args.benchtype)] & TF(FG=True)
-    local.cwd.chdir('scripts')
+    local.cwd.chdir(MY_CWD)
 
 def collect(output_file, times, **opts):
     merged = None
@@ -47,8 +47,9 @@ def collect(output_file, times, **opts):
         merged[name]['median_time'] = np.median(merged[name]['time'])
         merged[name]['time_siqr'] = iqr(merged[name]['time']) / 2
 
-    local.cwd.chdir(MY_CWD)
     with open(output_file, 'w') as out:
         json.dump(merged, out)
 
 collect('sygus_data.json', int(args.times))
+collect('sygus_template_infer.json', 1, TEMPLATE_INFER='1')
+collect('sygus_no_cache.json', 1, NO_CACHE='1')

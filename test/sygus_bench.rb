@@ -22,8 +22,8 @@ class SygusTest < Minitest::Test
   run_sygus_test('./sygus-strings/firstname.sl')
 
   # TIMEOUT
-  # run_sygus_test('./sygus-strings/initials.sl',
-  #   {:name => ProductDomain.top}, ProductDomain.val(StringSuffix.val(".", false), StringLength.val(4, 4)))
+  run_sygus_test('./sygus-strings/initials.sl',
+    {:name => ProductDomain.top}, ProductDomain.val(StringSuffix.val(".", false), StringLength.val(4, 4)))
 
   # (str.substr name (str.indexof name " " 0) (str.len name))
   run_sygus_test('./sygus-strings/lastname.sl')
@@ -57,22 +57,22 @@ class SygusTest < Minitest::Test
 
   # (str.++ (str.++ lastname (str.++ "," (str.++ " " (str.at firstname 0)))) ".")
   # TIMEOUT
-  # run_sygus_test('./sygus-strings/name-combine-4.sl',
-  #     {:firstname  => ProductDomain.val(StringPrefix.top,          StringSuffix.top),
-  #      :lastname   => ProductDomain.val(StringPrefix.var('lname'), StringSuffix.top)},
-  #     ProductDomain.val(StringPrefix.var('lname'), StringSuffix.val('.', false)))
+  run_sygus_test('./sygus-strings/name-combine-4.sl',
+      {:firstname  => ProductDomain.val(StringPrefix.top,          StringSuffix.top),
+       :lastname   => ProductDomain.val(StringPrefix.var('lname'), StringSuffix.top)},
+      ProductDomain.val(StringPrefix.var('lname'), StringSuffix.val('.', false)))
 
   run_sygus_test('./sygus-strings/name-combine.sl')
   run_sygus_test('./sygus-strings/phone-1.sl')
 
   # TIMEOUT
-  # run_sygus_test('./sygus-strings/phone-10.sl')
+  run_sygus_test('./sygus-strings/phone-10.sl')
 
   run_sygus_test('./sygus-strings/phone-2.sl')
 
   # TIMEOUT
-  # run_sygus_test('./sygus-strings/phone-3.sl',
-  #   {:name => StringLenExt.val(11)}, StringLenExt.val(13))
+  run_sygus_test('./sygus-strings/phone-3.sl',
+    {:name => StringLenExt.val(11)}, StringLenExt.val(13))
 
   run_sygus_test('./sygus-strings/phone-4.sl')
 
@@ -86,11 +86,11 @@ class SygusTest < Minitest::Test
     {:name => StringLenExt.var('name')}, StringLenExt.val(3))
 
   # TIMEOUT
-  # name_var = StringLenExt.var('name')
-  # res = StringLenExt.val(name_var.attrs[:val] - 1)
-  # res.asserts.push(res.attrs[:val] > 0)
-  # run_sygus_test('./sygus-strings/phone-9.sl',
-  #   {:name => name_var}, res)
+  name_var = StringLenExt.var('name')
+  res = StringLenExt.val(name_var.attrs[:val] - 1)
+  res.asserts.push(res.attrs[:val] > 0)
+  run_sygus_test('./sygus-strings/phone-9.sl',
+    {:name => name_var}, res)
 
   run_sygus_test('./sygus-strings/phone.sl')
 
