@@ -45,6 +45,13 @@ benches = [
 ]
 random.shuffle(benches)
 
+smallbenches = [
+  benchmarks.SO_11881165_depth1(),
+  benchmarks.SO_11418192_depth2(),
+  benchmarks.SO_13659881_depth2()
+]
+random.shuffle(smallbenches)
+
 def pprint_color(obj):
     print(highlight(obj, PythonLexer(), TerminalFormatter()))
 
