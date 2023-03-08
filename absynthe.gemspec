@@ -35,5 +35,4 @@ Gem::Specification.new do |spec|
   spec.add_dependency "sxp"
   spec.add_dependency "parser"
   spec.add_dependency "priority_queue_cxx"
-  spec.add_dependency "pandas"
 end
