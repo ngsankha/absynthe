@@ -8,7 +8,7 @@ import argparse
 import sys
 import csv
 
-parser = argparse.ArgumentParser(description='Run RbSyn benchmarks')
+parser = argparse.ArgumentParser(description='Run Absynthe SyGuS benchmarks')
 parser.add_argument('--times', '-t', dest='times', action='store',
                     default=11, help='number of times to run the benchmark')
 parser.add_argument('--smallbench', dest='benchtype', action='store_const',
