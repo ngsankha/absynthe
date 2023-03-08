@@ -1,9 +1,8 @@
-PATH
-  remote: ../rdl
+GIT
+  remote: https://github.com/ngsankha/rdl
+  revision: efc994bb61c29875c98cd85b374447d140e26661
   specs:
     rdl (2.2.0)
-      colorize (~> 0.8, >= 0.8.1)
-      method_source
       parser (~> 2.3, >= 2.3.1.4)
       sql-parser (~> 0.0.2)
 
@@ -21,7 +20,6 @@ PATH
   specs:
     absynthe (0.1.0)
       minitest
-      pandas
       parser
       priority_queue_cxx
       rake
@@ -35,7 +33,6 @@ GEM
     builder (3.2.4)
     byebug (11.1.3)
     coderay (1.1.3)
-    colorize (0.8.1)
     ffi (1.15.5)
     link_header (0.0.8)
     matrix (0.4.2)
@@ -46,11 +43,6 @@ GEM
       builder
       minitest (>= 5.0)
       ruby-progressbar
-    numpy (0.4.0)
-      pycall (>= 1.2.0.beta1)
-    pandas (0.3.8)
-      numpy
-      pycall (>= 1.0.0)
     parser (2.7.2.0)
       ast (~> 2.4.1)
     priority_queue_cxx (0.3.4)
@@ -60,8 +52,7 @@ GEM
     pry-byebug (3.8.0)
       byebug (~> 11.0)
       pry (~> 0.10)
-    pycall (1.4.1)
-    racc (1.6.0)
+    racc (1.6.2)
     rake (13.0.6)
     rdf (3.2.7)
       link_header (~> 0.0, >= 0.0.8)
