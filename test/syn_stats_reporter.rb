@@ -16,9 +16,8 @@ class SynthesisStatsReporter < Minitest::StatisticsReporter
   end
 
   def record(result)
-    return unless result.passed?
     @results_agg[result.name] = {
-      time: result.time,
+      time: result.passed? ? result.time : "-",
       size: Instrumentation.size,
       specs: Instrumentation.examples,
       gc_time: Instrumentation.gc_time,
