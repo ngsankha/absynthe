@@ -85,6 +85,10 @@ def run_benchmarks(benches, ignore_list):
         final_out = handle_action(p, bench)
         if final_out is None: # timeout
           skips.append(bench)
+          final_out = {}
+          final_out['depth'] = len(bench.seqs[0])
+          final_out['time'] = '-'
+          results[type(bench).__name__] = final_out
         else:
           prog = final_out['prog']
           pprint_color(prog)

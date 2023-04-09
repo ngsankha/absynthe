@@ -48,6 +48,8 @@ def collect(output_file, times, **opts):
         if '-' in merged[name]['time']:
             merged[name]['median_time'] = '-'
             merged[name]['time_siqr'] = '-'
+            merged[name]['tested_progs'] = '-'
+            merged[name]['size'] = '-'
         else:
             merged[name]['median_time'] = np.median(merged[name]['time'])
             merged[name]['time_siqr'] = iqr(merged[name]['time']) / 2

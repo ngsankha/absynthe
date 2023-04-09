@@ -43,8 +43,14 @@ def collect(output_file, times, **opts):
                 merged[name]['time'].append(data[name]['time'])
 
     for name, info in merged.items():
-        merged[name]['median_time'] = np.median(merged[name]['time'])
-        merged[name]['time_siqr'] = iqr(merged[name]['time']) / 2
+        if '-' in merged[name]['time']:
+            merged[name]['median_time'] = '-'
+            merged[name]['time_siqr'] = '-'
+            merged[name]['size'] = '-'
+            merged[name]['tested_progs'] = '-'
+        else:
+            merged[name]['median_time'] = np.median(merged[name]['time'])
+            merged[name]['time_siqr'] = iqr(merged[name]['time']) / 2
 
     with open(output_file, 'w') as out:
         json.dump(merged, out)
@@ -52,9 +58,9 @@ def collect(output_file, times, **opts):
 def to_table(data, filename):
     with open(filename, 'w', newline='') as csvfile:
         tablewriter = csv.writer(csvfile)
-        tablewriter.writerow(['Name', 'Time Median (s)', 'Time SIQR (s)', 'Size', 'Tested Progs'])
+        tablewriter.writerow(['Name', 'Depth', 'Time Median (s)', 'Time SIQR (s)', 'Size', 'Tested Progs'])
         for k, v in data.items():
-            tablewriter.writerow([k, v['median_time'], v['time_siqr'], v['size'], v['tested_progs']])
+            tablewriter.writerow([k, v['depth'], v['median_time'], v['time_siqr'], v['size'], v['tested_progs']])
 
 collect('autopandas_data.json', int(args.times))
 with open('autopandas_data.json', 'r') as f:
