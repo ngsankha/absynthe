@@ -1,4 +1,7 @@
 module Sygus
+  # concrete intrepreter for the SyGuS language
+  # follows the spec from https://smtlib.cs.uiowa.edu/theories-UnicodeStrings.shtml
+
   def self.interpret(env, node)
     case node.type
     when :const
@@ -86,6 +89,7 @@ module Sygus
     end
   end
 
+  # converts the internal AST representation to source S-expression syntax
   def self.unparse(node)
     case node.type
     when :const

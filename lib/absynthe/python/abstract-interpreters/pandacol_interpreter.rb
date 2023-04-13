@@ -1,3 +1,4 @@
+# The abstract interpter for Pandas methods defined using the Pandas columns domain
 module Python
   class PandasColsInterpreter < AbstractInterpreter
     ::DOMAIN_INTERPRETER[PandasCols] = self
@@ -8,6 +9,7 @@ module Python
 
     def self.interpret(env, node)
       case node.type
+      # constants and variables return the abstract value
       when :const
         konst = node.children[0]
         case konst
@@ -23,10 +25,13 @@ module Python
         else
           raise AbsyntheError, "unexpected constant type #{konst.inspect}"
         end
+      # arrays return the union of each abstract value
       when :array
         node.children.reduce(interpret(env, node.children[0])) { |u, n|
           u.union(interpret(env, n))
         }
+      # properties are .loc[], [], .T, .values
+      # these are treated like a method call
       when :prop
         recv = interpret(env, node.children[0])
         prop = node.children[1]
@@ -43,6 +48,8 @@ module Python
         else
           raise AbsyntheError, "unknown property #{prop}"
         end
+      # each method call is handled as it's own case for each supported method
+      # some methods returns the abstract value of the receiver of the method call, some return top, etc
       when :send
         recv = interpret(env, node.children[0])
         meth = node.children[1]
@@ -97,6 +104,7 @@ module Python
         else
           raise AbsyntheError, "unknown method #{meth}"
         end
+      # holes returns the abstract values projected into the Pandas Columns domain
       when :hole
         eval_hole(node)
       else

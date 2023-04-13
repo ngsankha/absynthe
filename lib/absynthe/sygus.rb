@@ -1,3 +1,5 @@
+# SyGuS specific imports for Absynthe
+
 require 'absynthe/passes/prog_size'
 require 'absynthe/sygus/interpreter'
 require 'absynthe/sygus/spec'

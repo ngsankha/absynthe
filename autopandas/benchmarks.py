@@ -1,3 +1,6 @@
+# The following benchmarks are sourced from the AutoPandas benchmarks
+# Source: https://github.com/rbavishi/autopandas/blob/master/autopandas_v2/evaluation/benchmarks/stackoverflow.py
+
 from io import StringIO
 import pandas as pd
 import numpy as np

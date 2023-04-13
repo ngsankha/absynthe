@@ -1,5 +1,8 @@
 require 'ast'
 
+# Counds the number of functions or property calls in a Python AST
+# This is the number of (:send ...) and (:prop ...) nodes in the AST
+
 class ProgSizePass < ::AST::Processor
   attr_reader :size
 

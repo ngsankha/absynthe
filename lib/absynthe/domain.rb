@@ -1,13 +1,18 @@
+# Base class for an abstract domain
+# Any abstract domain will extend from this class and override given methods here
+
 class AbstractDomain
   extend VarName
   attr_accessor :glb, :lub
 
+  # The <= relation
   def <=(rhs)
     raise AbsyntheError, "Unexpected type error #{self.class} with #{rhs.class}" if rhs.class != self.class
     lhs = self
     leq_impl(lhs, rhs)
   end
 
+  # returns a freshly instantiated variable
   def self.fresh_var
     self.var(fresh)
   end
@@ -16,6 +21,8 @@ class AbstractDomain
     respond_to? :solve
   end
 
+  # common cases for the <= relation. The extender usually needs to implement
+  # only val_leq and var_leq for values and variables respectively (given below)
   def leq_impl(lhs, rhs)
     if lhs.top?
       if rhs.top?
@@ -92,6 +99,7 @@ class AbstractDomain
     end
   end
 
+  # propages the greatest lower bound and least upper bound during <= comparison in variables
   def var_leq_update(lhs, rhs)
     root_vars = Globals.root_vars
     if Globals.root_vars_include? lhs

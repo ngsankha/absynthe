@@ -1,3 +1,4 @@
+# Similar to string prefix but for suffix
 class StringSuffix < AbstractDomain
   attr_reader :attrs, :variant
 
@@ -46,6 +47,7 @@ class StringSuffix < AbstractDomain
     @variant == :val
   end
 
+  # <= checks if one strings ends with the other string
   def val_leq(lhs, rhs)
     lhs.attrs[:suffix].end_with?(rhs.attrs[:suffix])
   end

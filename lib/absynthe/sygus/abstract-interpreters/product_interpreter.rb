@@ -1,7 +1,9 @@
 module Sygus
+  # base class of a product interpreter
   class ProductInterpreter < AbstractInterpreter
     ::DOMAIN_INTERPRETER[ProductDomain] = self
 
+    # it evaluates in each individual domain and then takes the product of each domain
     def self.interpret(env, node)
       _, val = env.first
       res_domains = val.domains.keys.map { |domain|

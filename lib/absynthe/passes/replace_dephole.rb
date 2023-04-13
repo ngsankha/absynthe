@@ -1,5 +1,9 @@
 require 'ast'
 
+# Dependent holes (or DepHoles) are holes that depend on the value of other
+# sibling holes, i.e., the nth argument in a function call in solver aided
+# domains that is inferred, when a model is found by SMT solving
+
 class ReplaceDepholePass < ::AST::Processor
 
   def initialize(ctx, count)

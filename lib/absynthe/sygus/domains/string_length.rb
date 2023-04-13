@@ -1,3 +1,5 @@
+# Not recommended! Use StringLenExt domain
+
 class StringLength < AbstractDomain
   include VarName
   attr_reader :attrs, :variant

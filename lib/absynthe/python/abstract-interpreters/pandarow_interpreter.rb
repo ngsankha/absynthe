@@ -1,3 +1,5 @@
+# NOTE: This is experimental. This is not used in the Absynthe paper.
+
 module Python
   class PandasRowsInterpreter < AbstractInterpreter
     ::DOMAIN_INTERPRETER[PandasRows] = self

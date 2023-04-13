@@ -9,6 +9,7 @@ class TemplateInfer
   def infer
     res = nil
     @args.each { |name, type|
+      # 2 examples where we use test with predicates as an optimization
       res = check_predicate(
             s(:send, :"str.suffixof",
               s(:const, :out),
@@ -30,6 +31,7 @@ class TemplateInfer
     res
   end
 
+  # utility method that tests using the predicate `pred` and if true returns a `template`
   def check_predicate(pred, template)
     res = @constraints.all? { |inp, out|
       env = @ctx.init_env.dup

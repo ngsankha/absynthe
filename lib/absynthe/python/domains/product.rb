@@ -6,6 +6,7 @@ class ProductDomain < AbstractDomain
 
   private_class_method :new
 
+  # The products of these domains:
   @@classes = [
     PyType,
     PandasCols

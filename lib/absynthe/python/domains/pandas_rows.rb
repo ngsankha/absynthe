@@ -1,3 +1,5 @@
+# Pandas rows domain; not supported well and not used in paper
+
 require 'set'
 
 class PandasRows < AbstractDomain

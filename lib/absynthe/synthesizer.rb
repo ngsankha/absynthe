@@ -1,3 +1,5 @@
+# The following algorithm is described with reference of Absynthe paper: Algorithm 1
+
 def synthesize(ctx, spec, q)
   if ctx.lang == :sygus
     lang = spec.lang
@@ -5,9 +7,13 @@ def synthesize(ctx, spec, q)
     lang = nil
   end
 
+  # line 5
   until q.empty? do
+    # line 6
     current = q.top
     q.pop
+
+    # next few lines are for line 7
     pass = ExpandHolePass.new(ctx, lang)
     # puts Sygus::unparse(current)
     # puts current
@@ -33,6 +39,7 @@ def synthesize(ctx, spec, q)
         # puts "==>"
         # puts prog
 
+        # next few lines are for line 8
         # solve dependent holes at <=, model gives value to remaining hole
         if absval <= ctx.goal
           if hc_pass.num_holes == 0
@@ -45,11 +52,13 @@ def synthesize(ctx, spec, q)
           end
           score = ctx.score.call(prog)
           size = ProgSizePass.prog_size(prog)
+          # line 15
           q.push(prog, score) if size <= ctx.max_size
         end
       else
         # src = Sygus::unparse(prog)
         # puts src
+        # line 12
         if spec.test_prog(prog)
           return prog
         else

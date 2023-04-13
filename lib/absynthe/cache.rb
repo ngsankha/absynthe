@@ -1,4 +1,7 @@
 class Cache
+  # generates a cache of small terms, that enables these function applications
+  # to be substituted just like constants
+
   def self.populate_sygus(ctx, lang)
     cache = {}
     templates = {}

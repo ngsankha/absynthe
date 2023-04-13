@@ -1,3 +1,4 @@
+# The abstract interpter for Pandas methods defined using the RDL types domain
 module Python
   class PyTypeInterpreter < AbstractInterpreter
     ::DOMAIN_INTERPRETER[PyType] = self
@@ -8,6 +9,7 @@ module Python
 
     def self.interpret(env, node)
       case node.type
+        # returns the types of constants and variables
       when :const
         konst = node.children[0]
         case konst
@@ -34,10 +36,12 @@ module Python
         # warning: does not return an abstract domain!!
         v = interpret(env, node.children[1])
         [node.children[0], v.attrs[:ty]]
+      # retuns the hash type or a finite hash type
       when :hash
         PyType.val(RDL::Type::FiniteHashType.new(
           node.children.map { |elt| interpret(env, elt)}
             .to_h, nil))
+      # nominal arrays or generic type of arrays
       when :array
         # TODO(unsound): iterate over all items in the array
         # TODO: handle empty arrays
@@ -45,6 +49,8 @@ module Python
         v = interpret(env, item0)
         node.children[1..].each { |k| v = domain.val(RDL::Type::UnionType.new(v.attrs[:ty], interpret(env, k).attrs[:ty])) }
         domain.val(RDL::Type::GenericType.new(RDL::Globals.types[:array], v.attrs[:ty].canonical)).promote
+      # properties and method calls are resolved by looking up the RDL class table
+      # checking if the arguments are a subtype and then return the type in the retuns position from the signature
       when :prop, :send
         recv = interpret(env, node.children[0])
         meth_name = node.children[1]
@@ -95,6 +101,7 @@ module Python
         # puts "==> #{args[0] <= PyType.val(meths[meth_name][:type][0].args[0])}" if ret_ty.top?
 
         ret_ty
+      # holes returns the abstract values projected into the RDL Types domain
       when :hole
         eval_hole(node)
       else

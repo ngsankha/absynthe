@@ -1,3 +1,5 @@
+# Domain contains the RDL types wrapped in the Absynthe domains API
+
 class PyType < AbstractDomain
   attr_reader :attrs, :variant
 
@@ -5,6 +7,7 @@ class PyType < AbstractDomain
 
   def initialize(variant, **attrs)
     @variant = variant
+    # {:ty => RDL::Type}
     @attrs = attrs
   end
 
@@ -15,6 +18,7 @@ class PyType < AbstractDomain
     @@top
   end
 
+  # calls RDL#promote
   def promote
     if @attrs[:ty].is_a?(RDL::Type::GenericType) &&
        @attrs[:ty].base == RDL::Globals.types[:array]
@@ -69,6 +73,7 @@ class PyType < AbstractDomain
     @variant == :val
   end
 
+  # subtyping based on RDl subtyping
   def val_leq(lhs, rhs)
     if lhs.attrs[:ty].is_a?(RDL::Type::FiniteHashType) &&
        rhs.attrs[:ty].is_a?(RDL::Type::FiniteHashType)
@@ -94,7 +99,7 @@ class PyType < AbstractDomain
   def self.from(val)
     raise AbsyntheError, "unimplemented"
   end
-
+ 
   def to_s
     if top?
       "⊤"

@@ -1,4 +1,7 @@
 module Sygus
+
+  # A SyGuS problem specification
+
   class ProblemSpec
     attr_reader :func_name, :args, :ret_type, :lang, :constraints, :init_env
 
@@ -8,6 +11,7 @@ module Sygus
       eval(ast)
     end
 
+    # runs a program against a given SyGuS input output examples
     def test_prog(prog)
       begin
         @constraints.all? { |input, output|
@@ -24,6 +28,8 @@ module Sygus
     end
 
     private
+    # all eval* methods below are used to parse the SyGuS specfication file to
+    # load it into the Absynthe internal representation
     def eval(ast)
       ast.each { |n| eval_node(n) }
     end

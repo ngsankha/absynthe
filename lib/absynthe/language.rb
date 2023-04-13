@@ -1,3 +1,5 @@
+# The language defintion of SyGuS. The `Language` class uses the `Terminal` and
+# `NonTerminal`s to define the product rules parsed from the input problem file.
 class Terminal
   attr_reader :name, :type
 

@@ -1,3 +1,5 @@
+# Not recommended! Use StringLenExtInterpreter
+
 module Sygus
   class StringLengthInterpreter < AbstractInterpreter
     ::DOMAIN_INTERPRETER[StringLength] = self

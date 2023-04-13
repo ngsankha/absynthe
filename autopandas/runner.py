@@ -8,7 +8,15 @@ def flatten(xs):
     except:
         return xs
 
+# Defines and infers the domains required by AutoPandas in Python
+# Note that all the methods required by each domain is still defined in Ruby.
+# The code here just reads a Python value, infers necessary abstractions,
+# serializes it and then hands it as a JSON to the Absynthe core.
+# This allows us to leverage native Python methods and libraries to infer
+# abstractions from Python values.
+
 class Abstraction:
+    # Infers the type from a Python value
     def _infer_type(arg):
         if isinstance(arg, pd.DataFrame):
             return 'DataFrame'
@@ -28,20 +36,24 @@ class Abstraction:
         else:
             raise Exception("Unexpected input argument {}".format(arg))
 
+    # Infers row labels as a set
     def _infer_rownum(df):
         # return list(df.index)
         return list(set(flatten(list(df.index))))
 
+    # Gets the types for input and output examples
     def types(b):
         inp = list(map(Abstraction._infer_type, b.inputs))
         out = Abstraction._infer_type(b.output)
         return [inp, out]
 
+    # Infers row labels as a set for input and output examples
     def rownums(b):
         inp = list(map(Abstraction._infer_rownum, b.inputs))
         out = Abstraction._infer_rownum(b.output)
         return [inp, out]
 
+    # Infer constants from Pandas indexes
     def index2const(index):
         consts = []
         if type(index) in [pd.Index, pd.Int64Index, pd.DatetimeIndex] :
@@ -61,6 +73,7 @@ class Abstraction:
 
         return filter(lambda v: v is not None, consts)
 
+    # Set of constants in rows and columns
     def consts(b):
         filtered_vals = list(filter(lambda v: isinstance(v, pd.DataFrame), b.inputs + [b.output]))
         val_indexes = map(Abstraction.index2const, map(lambda v: v.index, filtered_vals))
@@ -73,6 +86,7 @@ class Abstraction:
         supported_consts = filter(lambda v: type(v) in [int, str], consts)
         return set(supported_consts)
 
+    # Set of column labels as inputs
     def cols_inp(b):
         idx = 0
         colmap = {}
@@ -110,6 +124,7 @@ class Abstraction:
 
         return (args, outcol)
 
+    # Combine all these individual abstractions into the composite object
     def all(b):
         tyin, tyout = Abstraction.types(b)
         # rownumin, rownumout = Abstraction.rownums(b)
@@ -125,6 +140,8 @@ class Abstraction:
             'seqs': len(b.seqs[0])
         }
 
+# Base class for each benchmark. We define a `test_candidate` method that
+# allows one to run a candidate against a benchmark's input/output example
 class Benchmark:
     def __init__(self):
         pass

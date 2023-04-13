@@ -1,3 +1,5 @@
+# Python specific imports for Absynthe
+
 require 'absynthe/passes/func_count'
 require 'absynthe/passes/py_prog_size'
 require 'absynthe/passes/py_expand_hole'

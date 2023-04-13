@@ -1,8 +1,13 @@
+# Base class for defining abstract interpreters
+
 class AbstractInterpreter
+  # returns the interpreter for a given domain
   def self.interpreter_from(domain)
     ::DOMAIN_INTERPRETER[domain]
   end
 
+  # evaluates the hole, and returns the projection of the abstract value in the
+  # domain for which the current interpter is defined
   def self.eval_hole(node)
     return node.children[1] if node.children[1].class == domain
     project_domain(node.children[1], domain)

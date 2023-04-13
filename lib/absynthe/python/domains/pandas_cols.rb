@@ -1,3 +1,6 @@
+# Domain contains the set of labels of the columns in a Pandas dataframe
+# The order of labels does not matter
+
 require 'set'
 
 class PandasCols < AbstractDomain
@@ -7,6 +10,7 @@ class PandasCols < AbstractDomain
 
   def initialize(variant, **attrs)
     @variant = variant
+    # {:name => String(unique identifier of set)}
     @attrs = attrs
   end
 
@@ -48,6 +52,7 @@ class PandasCols < AbstractDomain
     @variant == :val
   end
 
+  # Works only for unique name labels of type of column label sets
   def val_leq(lhs, rhs)
     lhs.attrs[:name] == rhs.attrs[:name]
   end

@@ -1,5 +1,7 @@
 DOMAIN_INTERPRETER = {}
 
+# common imports for Absynthe
+
 require 'parser/current'
 require 'absynthe/version'
 require 'absynthe/globals'

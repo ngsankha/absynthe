@@ -1,3 +1,5 @@
+# internal state of Absynthe during synthesis
+
 class Context
   attr_reader :init_env, :goal, :consts
   attr_accessor :lang, :domain, :cache, :score, :max_size

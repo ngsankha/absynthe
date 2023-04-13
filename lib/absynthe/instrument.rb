@@ -1,5 +1,8 @@
 require 'json'
 
+# Used to track statistics during synthesis. This is used to generate the
+# tables in the artifact and the paper
+
 class Instrumentation
   class << self
     attr_accessor :size, :examples, :gc_time, :tested_progs, :domain

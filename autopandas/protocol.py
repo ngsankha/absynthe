@@ -1,3 +1,7 @@
+# This file defines the IPC protocol used by the AutoPandas Python test harness
+# process to communicate with the Absynthe core process in Ruby. This is a JSON
+# line protocol with each action decribing steps happening with every message.
+
 import json
 
 class Action:
@@ -15,6 +19,7 @@ class Protocol:
         # TODO: process ended
         return
       try:
+        # read messages returned by Absynthe core
         data = json.loads(line)
         # TODO: additional parsing
         return data
@@ -31,13 +36,18 @@ class Protocol:
 def handle_action(protocol, bench):
   while True:
     data = protocol.read()
+    # The cases below describe all the messages handled by the Absynthe 
     if data['action'] == 'test':
+      # Absynthe core asking to test a candidate in Python
       res = bench.test_candidate(data['prog'])
       protocol.write({'action': 'test_res', 'res': res})
     elif data['action'] == 'done':
+      # Absynthe core finished synthesizing a function
       data.pop('action', None)
       return data
     elif data['action'] == 'timeout':
+      # Absynthe core had a timeout during synthesis
       return None
     else:
+      # Unexpected message
       raise Exception("Unexpected RPC message")

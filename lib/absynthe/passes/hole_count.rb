@@ -1,5 +1,7 @@
 require 'ast'
 
+# Counts the number of holes and variables in an AST
+
 class HoleCountPass < ::AST::Processor
   attr_reader :num_holes, :num_depholes, :num_var
 
