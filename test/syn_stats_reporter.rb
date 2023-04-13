@@ -22,7 +22,9 @@ class SynthesisStatsReporter < Minitest::StatisticsReporter
       size: Instrumentation.size,
       specs: Instrumentation.examples,
       gc_time: Instrumentation.gc_time,
-      tested_progs: Instrumentation.tested_progs
+      tested_progs: Instrumentation.tested_progs,
+      height: Instrumentation.height,
+      eliminated: Instrumentation.eliminated
     }
   end
 

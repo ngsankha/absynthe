@@ -52,6 +52,7 @@ module SygusTestRunner
         Timeout::timeout(10 * 60) do
           prog = synthesize(ctx, spec, q)
           Instrumentation.size = ProgSizePass.prog_size(prog)
+          Instrumentation.height = ProgHeightPass.prog_height(prog)
 
           puts Sygus::unparse(prog)
           writer.write(Instrumentation.to_json)

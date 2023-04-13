@@ -1,4 +1,5 @@
 require 'absynthe/passes/prog_size'
+require 'absynthe/passes/prog_height'
 require 'absynthe/sygus/interpreter'
 require 'absynthe/sygus/spec'
 require 'absynthe/sygus/domains/string_length'
