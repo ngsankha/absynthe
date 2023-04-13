@@ -91,6 +91,7 @@ def run_benchmarks(benches, ignore_list):
           results[type(bench).__name__] = final_out
         else:
           prog = final_out['prog']
+          final_out['depth'] = len(bench.seqs[0])
           pprint_color(prog)
           print(final_out['time'])
           results[type(bench).__name__] = final_out
