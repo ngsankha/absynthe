@@ -1,3 +1,7 @@
+# interpreter for the string suffix domain
+# see the string prefix domain for explanations. This interpreter follows
+# the same pattern but with suffixes
+
 module Sygus
   class SuffixInterpreter < AbstractInterpreter
     ::DOMAIN_INTERPRETER[StringSuffix] = self

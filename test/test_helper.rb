@@ -33,7 +33,14 @@ module SygusTestRunner
         lang = spec.lang
         constraints = spec.constraints
         abs_env = spec.init_env.map { |k, v| [k, ProductDomain.top]}.to_h if abs_env.nil?
-        target_abs = ProductDomain.top if target_abs.nil?
+
+        if target_abs.nil?
+          target_abs = ProductDomain.top
+          Instrumentation.domain = "⊤"
+        else
+          Instrumentation.domain = target_abs.class.to_s
+        end
+
         ctx = Context.new(abs_env, target_abs)
         Globals.root_vars = ctx.init_env.values.filter { |v| v.var? }
 

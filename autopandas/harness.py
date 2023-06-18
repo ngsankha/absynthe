@@ -12,6 +12,7 @@ from pygments.lexers import PythonLexer
 from pygments.formatters import TerminalFormatter
 from protocol import Protocol, handle_action
 
+# List of benchmarks to run in standard mode
 benches = [
   benchmarks.SO_11881165_depth1(),
   benchmarks.SO_11941492_depth1(),
@@ -45,6 +46,7 @@ benches = [
 ]
 random.shuffle(benches)
 
+# List of benchmarks to run in --smallbench mode
 smallbenches = [
   benchmarks.SO_11881165_depth1(),
   benchmarks.SO_11418192_depth2(),
@@ -68,25 +70,36 @@ def run_benchmarks(benches, ignore_list):
     try:
       with warnings.catch_warnings():
         warnings.simplefilter("ignore")
+        # infer abstract spec from the input output example
         data = bench.absynthe_input()
         data['action'] = 'start'
         env = os.environ
         env['RUBYOPT'] = '-W0'
 
-
+        # run Absynthe as a child process
         proc = subprocess.Popen(['bundle', 'exec', 'bin/autopandas'],
                                 stdout=subprocess.PIPE,
                                 stdin=subprocess.PIPE,
                                 # stderr=subprocess.PIPE,
                                 cwd=r'..',
                                 env=env)
+        # use the I/O protcol to communicate with Absynthe
         p = Protocol(proc, log=True)
         p.write(data)
         final_out = handle_action(p, bench)
-        if final_out is None: # timeout
+        if final_out is None:
+          # timeout happened
+          # results are logged with a `-` for the time taken
           skips.append(bench)
+          final_out = {}
+          final_out['depth'] = len(bench.seqs[0])
+          final_out['time'] = '-'
+          results[type(bench).__name__] = final_out
         else:
+          # benchmark completed to success
+          # synthesized program and the time is logged
           prog = final_out['prog']
+          final_out['depth'] = len(bench.seqs[0])
           pprint_color(prog)
           print(final_out['time'])
           results[type(bench).__name__] = final_out

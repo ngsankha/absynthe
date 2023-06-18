@@ -5,6 +5,7 @@ class ExtractASTPass < ::AST::Processor
     @selection = selection
   end
 
+  # given some indexes of subterms in holes, it returns the extract AST ffrom those holes
   def on_filled_hole(node)
     # first node is the goal abstract value
     idx = @selection.shift + 1

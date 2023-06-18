@@ -1,3 +1,5 @@
+# Solver aided string length domain interpreter
+
 module Sygus
   class StringLenExtInterpreter < AbstractInterpreter
     ::DOMAIN_INTERPRETER[StringLenExt] = self
@@ -9,6 +11,7 @@ module Sygus
 
     def self.interpret(env, node)
       case node.type
+      # constants return the abstract value
       when :const
         konst = node.children[0]
         case konst
@@ -22,8 +25,10 @@ module Sygus
         else
           raise AbsyntheError, "unexpected constant type"
         end
+      # semantics of individual sygus string functions
       when :send
         case node.children[0]
+        # symbolically concatenate 2 strings lengths
         when :"str.++"
           arg0 = interpret(env, node.children[1])
           arg1 = interpret(env, node.children[2])
@@ -38,8 +43,10 @@ module Sygus
             res.asserts.push(*arg1.asserts)
             res
           end
+        # top, since there is no way to represent this in string length
         when :"str.replace"
           StringLenExt.top
+        # if the lookup index is within string length, the final length is 1 else 0
         when :"str.at"
           arg0 = interpret(env, node.children[1])
           arg1 = interpret(env, node.children[2])
@@ -61,6 +68,7 @@ module Sygus
           end
         when :"int.to.str"
           StringLenExt.top
+        # if the indexes are within bounds, the length is end - start indexes
         when :"str.substr"
           arg0 = interpret(env, node.children[1])
           arg1 = interpret(env, node.children[2])
@@ -78,6 +86,7 @@ module Sygus
             res.asserts.push(*arg2.asserts)
             res
           end
+        # symbolically add 2 numbers
         when :+
           arg0 = interpret(env, node.children[1])
           arg1 = interpret(env, node.children[2])
@@ -91,6 +100,7 @@ module Sygus
             res.asserts.push(*arg1.asserts)
             res
           end
+        # symbolically subtract 2 numbers
         when :-
           arg0 = interpret(env, node.children[1])
           arg1 = interpret(env, node.children[2])
@@ -105,6 +115,7 @@ module Sygus
             res.asserts.push(res.attrs[:val] > 0)
             res
           end
+        # we are already in string length, return the same
         when :"str.len"
           arg0 = interpret(env, node.children[1])
           if !(arg0.top? || arg0.bot?)

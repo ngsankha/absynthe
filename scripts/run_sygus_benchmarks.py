@@ -45,8 +45,14 @@ def collect(output_file, times, **opts):
                     merged[name]['time'].append(data[name]['time'])
 
     for name, info in merged.items():
-        merged[name]['median_time'] = np.median(merged[name]['time'])
-        merged[name]['time_siqr'] = iqr(merged[name]['time']) / 2
+        if '-' in merged[name]['time']:
+            merged[name]['median_time'] = '-'
+            merged[name]['time_siqr'] = '-'
+            merged[name]['tested_progs'] = '-'
+            merged[name]['size'] = '-'
+        else:
+            merged[name]['median_time'] = np.median(merged[name]['time'])
+            merged[name]['time_siqr'] = iqr(merged[name]['time']) / 2
 
     with open(output_file, 'w') as out:
         json.dump(merged, out)
@@ -65,9 +71,9 @@ def combine_results(base, no_template, no_cache):
 def to_table(data, filename):
     with open(filename, 'w', newline='') as csvfile:
         tablewriter = csv.writer(csvfile)
-        tablewriter.writerow(['Name', 'Time Median (s)', 'Time SIQR (s)', 'Size', '# Ex', 'Tested Progs', 'No cache', 'No template'])
+        tablewriter.writerow(['Name', 'Time Median (s)', 'Time SIQR (s)', 'Size', '# Ex', 'Tested Progs', 'Domains', 'No cache', 'No template'])
         for k, v in data.items():
-            tablewriter.writerow([k, v['median_time'], v['time_siqr'], v['size'], v['specs'], v['tested_progs'], v['no_cache'], v['no_template']])
+            tablewriter.writerow([k, v['median_time'], v['time_siqr'], v['size'], v['specs'], v['tested_progs'], v['domain'], v['no_cache'], v['no_template']])
 
 collect('sygus_data.json', int(args.times))
 collect('sygus_template_infer.json', 1, TEMPLATE_INFER='1')

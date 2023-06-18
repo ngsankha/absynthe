@@ -1,3 +1,7 @@
+# String Prefix abstract domain
+# Keeps track of a prefix of the string, and if that string is identical to the stored prefix or not
+# The latter provides more precision in string concat operations
+
 class StringPrefix < AbstractDomain
   attr_reader :attrs, :variant
 
@@ -46,6 +50,7 @@ class StringPrefix < AbstractDomain
     @variant == :val
   end
 
+  # <= checks if one strings starts with the other string
   def val_leq(lhs, rhs)
     lhs.attrs[:prefix].start_with?(rhs.attrs[:prefix])
   end

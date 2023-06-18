@@ -1,5 +1,10 @@
 require 'ast'
 
+# Weighted program pass ranks programs by giving higher value to method calls
+# and properties than other AST nodes. Effectively, methods with higher number
+# of arguments are ranked earlier if uses weighted program size, than having
+# more methods with total same number of AST nodes
+
 class WeightedSizePass < ::AST::Processor
   attr_reader :size
 

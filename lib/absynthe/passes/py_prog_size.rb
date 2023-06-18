@@ -1,5 +1,7 @@
 require 'ast'
 
+# Count the size of Python program ASTs
+
 class PyProgSizePass < ::AST::Processor
   attr_reader :size
 

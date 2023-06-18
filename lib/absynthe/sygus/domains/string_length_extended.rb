@@ -33,6 +33,8 @@ FalseClass.prepend LazyZ3::Bool
 #   end
 # end
 
+# String length domain backed by Z3
+
 # TODO: there is no way to distinguish strings and integers when lifted to
 # this domain. Is that fine?
 class StringLenExt < AbstractDomain
@@ -121,6 +123,7 @@ class StringLenExt < AbstractDomain
     raise AbsyntheError, "unimplemented!"
   end
 
+  # returns a fresh dependent hole when possible
   def self.replace_dep_hole!(name, args)
     case name
     when :"str.++"
@@ -172,6 +175,7 @@ class StringLenExt < AbstractDomain
     @attrs[:val].is_a?(LazyZ3::Z3Node)
   end
 
+  # combines all assertions collected till now with a conjunction
   def combine_asserts(lhs, rhs)
     all_asserts = lhs.asserts + rhs.asserts
     all_asserts.reject! { |a| a.is_a?(TrueClass) }
@@ -186,6 +190,7 @@ class StringLenExt < AbstractDomain
     end
   end
 
+  # evaluates using Z3 to check the <= relation
   def concrete_leq(lhs, rhs)
     if lhs.attrs[:val].is_a?(LazyZ3::Z3Node) ||
        rhs.attrs[:val].is_a?(LazyZ3::Z3Node)

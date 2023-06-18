@@ -1,5 +1,7 @@
 #!/usr/bin/env ruby
 
+# Using the Absynthe framework to define a synthesizer for Pandas programs in Python
+
 require "bundler/setup"
 require "absynthe"
 require "absynthe/python"
@@ -8,6 +10,7 @@ require "rdl"
 require "fc"
 require "pp"
 
+# All constants used by the type signatures
 class DataFrame; end
 class Series; end
 class Lambda; end
@@ -17,6 +20,7 @@ class PyInt < Type; end
 class DataFrameGroupBy; end
 class NdArray; end
 
+# Types of the library methods supported by Pandas in Absynthe
 RDL.type_params :Array, [:t], :all?
 RDL.type :DataFrame, :loc_getitem, "(Array<Integer>) -> DataFrame"
 RDL.type :DataFrame, :loc_getitem, "(Lambda) -> DataFrame"
@@ -62,6 +66,7 @@ RDL.type :DataFrameGroupBy, :mean, "() -> DataFrame"
 
 $stdout.sync = true
 
+# IPC protocol used to communicate with the Python test harness
 class Protocol
   def self.read
     l = gets
@@ -77,6 +82,7 @@ class Protocol
 end
 
 class PythonSpec
+  # Request the Python interpreter to run a test on a candidate and return the results
   def test_prog(prog)
     Protocol.write({
       action: 'test',
@@ -87,6 +93,7 @@ class PythonSpec
 end
 
 class PyLang
+  # translates the AST to a Python source string
   def self.unparse(node, in_arg: false)
     case node.type
     when :const
@@ -165,16 +172,20 @@ def parse_cols(data)
    PandasCols.var(data['colout'])]
 end
 
+# Starts the entire synthesis process with the `data` received from the Python test harness
 def syn_start(data)
   start_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
   consts = data['consts']
   argsty = data['argsty']
+  # The type signature of the Python synthesis goal
   fnty = RDL::Globals.parser.scan_str("(#{argsty.join(', ')}) -> #{data['outputty']}")
+  # The input/output abstraction of the set of column label synthesis goal
   col_in, col_out = parse_cols(data)
   spec = PythonSpec.new
 
   tyargs = fnty.args.map { |ty| PyType.val(ty) }
 
+  # The abstract environment maps variable names to product of their types and their column label sets
   abs_env = tyargs.zip(col_in).each_with_index.map { |arg, i|
       ["arg#{i}".to_sym, ProductDomain.val(arg[0], arg[1])]
     }.to_h
@@ -190,13 +201,18 @@ def syn_start(data)
   ctx.max_size = data['seqs']
   # puts "==> #{ctx.max_size}"
 
+  # The initial template from which synthesis will start
   seed = s(:hole, nil, ctx.goal)
+  # The heap that contains an ordered lists of candidate programs
   q = FastContainers::PriorityQueue.new(:min)
   q.push(seed, ProgSizePass.prog_size(seed))
   begin
+    # Max time: 20 mins
     Timeout::timeout(20 * 60) do
+      # Run the Absynthe synthesizer
       prog = synthesize(ctx, spec, q)
       end_time = Process.clock_gettime(Process::CLOCK_MONOTONIC)
+      # Write the successful program back to the Python harness
       Protocol.write({
         action: 'done',
         time: end_time - start_time,
@@ -213,11 +229,14 @@ def syn_start(data)
   end
 end
 
+# Messages handled by the Ruby IPC protocol
 def handle_action(data)
   case data['action']
   when 'start'
+    # Requested synthesis start
     syn_start(data)
   when 'test_res'
+    # Results of running a test
     data['res']
   else
     raise AbsyntheError, "unexpected action #{data}"
@@ -225,5 +244,6 @@ def handle_action(data)
 end
 
 Instrumentation.reset!
+# Start the synthesis process when some information is read from the Python test harness
 handle_action(Protocol.read)
 # handle_action({'args': ['DataFrame'], 'output': 'DataFrame', 'action': 'start'}.transform_keys(&:to_s))

@@ -1,5 +1,7 @@
 require 'ast'
 
+# Counts the number of nodes in an AST
+
 class ProgSizePass < ::AST::Processor
   attr_reader :size
 

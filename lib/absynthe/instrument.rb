@@ -1,8 +1,11 @@
 require 'json'
 
+# Used to track statistics during synthesis. This is used to generate the
+# tables in the artifact and the paper
+
 class Instrumentation
   class << self
-    attr_accessor :size, :examples, :gc_time, :tested_progs, :height, :eliminated
+    attr_accessor :size, :examples, :gc_time, :tested_progs, :height, :eliminated, :domain
 
     def reset!
       @size = nil
@@ -11,6 +14,7 @@ class Instrumentation
       @tested_progs = 0
       @height = 0
       @eliminated = 0
+      @domain = ""
     end
 
     def from_json(obj)
@@ -20,6 +24,7 @@ class Instrumentation
       @tested_progs = obj["tested_progs"]
       @height = obj["height"]
       @eliminated = obj["eliminated"]
+      @domain = obj["domain"]
     end
 
     def to_json
@@ -28,7 +33,8 @@ class Instrumentation
        :gc_time => @gc_time,
        :tested_progs => @tested_progs,
        :height => @height,
-       :eliminated => @eliminated
+       :eliminated => @eliminated,
+       :domain => @domain
      }.to_json
     end
   end

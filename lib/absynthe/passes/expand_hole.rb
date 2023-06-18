@@ -12,6 +12,9 @@ class ExpandHolePass < ::AST::Processor
     @expand_map = []
   end
 
+  # Looks up the SyGuS grammar rules and fills in possible AST nodes at the hole
+  # Non terminals lead to AST nodes with more holes
+  # Terminals lead to variables or constants
   def on_hole(node)
     goal = node.children[1]
     rules = @lang.rules[node.children[0]]

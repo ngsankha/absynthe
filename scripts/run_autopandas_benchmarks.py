@@ -25,6 +25,37 @@ args = parser.parse_args()
 ABSYNTHE_PATH = '..'
 MY_CWD = os.getcwd()
 IGNORE_LIST = []
+BENCH_ORDER = [
+ 'SO_11881165_depth1',
+ 'SO_11941492_depth1',
+ 'SO_13647222_depth1',
+ 'SO_18172851_depth1',
+ 'SO_49583055_depth1',
+ 'SO_49583055_depth1',
+ 'SO_49592930_depth1',
+ 'SO_49572546_depth1',
+ 'SO_12860421_depth1',
+ 'SO_13261175_depth1',
+ 'SO_13793321_depth1',
+ 'SO_14085517_depth1',
+ 'SO_11418192_depth2',
+ 'SO_49567723_depth2',
+ 'SO_49987108_depth2',
+ 'SO_13261691_depth2',
+ 'SO_13659881_depth2',
+ 'SO_13807758_depth2',
+ 'SO_34365578_depth2',
+ 'SO_10982266_depth3',
+ 'SO_11811392_depth3',
+ 'SO_49581206_depth3',
+ 'SO_12065885_depth3',
+ 'SO_13576164_depth3',
+ 'SO_14023037_depth3',
+ 'SO_53762029_depth3',
+ 'SO_21982987_depth3',
+ 'SO_39656670_depth3',
+ 'SO_23321300_depth3'
+]
 
 def collect(output_file, times, **opts):
     merged = None
@@ -43,8 +74,14 @@ def collect(output_file, times, **opts):
                 merged[name]['time'].append(data[name]['time'])
 
     for name, info in merged.items():
-        merged[name]['median_time'] = np.median(merged[name]['time'])
-        merged[name]['time_siqr'] = iqr(merged[name]['time']) / 2
+        if '-' in merged[name]['time']:
+            merged[name]['median_time'] = '-'
+            merged[name]['time_siqr'] = '-'
+            merged[name]['size'] = '-'
+            merged[name]['tested_progs'] = '-'
+        else:
+            merged[name]['median_time'] = np.median(merged[name]['time'])
+            merged[name]['time_siqr'] = iqr(merged[name]['time']) / 2
 
     with open(output_file, 'w') as out:
         json.dump(merged, out)
@@ -52,9 +89,11 @@ def collect(output_file, times, **opts):
 def to_table(data, filename):
     with open(filename, 'w', newline='') as csvfile:
         tablewriter = csv.writer(csvfile)
-        tablewriter.writerow(['Name', 'Time Median (s)', 'Time SIQR (s)', 'Size', 'Tested Progs'])
-        for k, v in data.items():
-            tablewriter.writerow([k, v['median_time'], v['time_siqr'], v['size'], v['tested_progs']])
+        tablewriter.writerow(['Name', 'Depth', 'Time Median (s)', 'Time SIQR (s)', 'Size', 'Tested Progs'])
+        for k in BENCH_ORDER:
+            if k in data:
+                v = data[k]
+                tablewriter.writerow([k, v['depth'], v['median_time'], v['time_siqr'], v['size'], v['tested_progs']])
 
 collect('autopandas_data.json', int(args.times))
 with open('autopandas_data.json', 'r') as f:

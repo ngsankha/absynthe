@@ -2,6 +2,8 @@ require 'ast'
 require 'pry'
 require 'pry-byebug'
 
+# Looks up the Python rules and fills in possible AST nodes at the hole
+
 class ExpandHolePass < ::AST::Processor
   attr_reader :expand_map
   include VarName
@@ -24,7 +26,10 @@ class ExpandHolePass < ::AST::Processor
     interpreter = AbstractInterpreter.interpreter_from(@ctx.domain)
     expanded = []
 
-    # consts
+    # Holes are filled by looking up the corresponding type definition.
+    # Each case is outlined below
+
+    # 1. consts
     # TODO: fix constants
     if RDL::Globals.types[:string] <= ty
       @ctx.consts[:str].each { |v| expanded << s(:const, v) }
@@ -45,18 +50,19 @@ class ExpandHolePass < ::AST::Processor
       @ctx.consts[:int].each { |v| expanded << s(:const, v) }
     end
 
-    # union type
+    # 2. union type
     if ty.is_a? RDL::Type::UnionType
       ty.types.each { |t|
         expanded << s(:hole, nil, ProductDomain.val(PyType.val(t), PandasCols.fresh_var))
       }
     end
 
-    # vars
+    # 3. vars
     @ctx.init_env.each { |name, val|
       expanded << s(:const, name.to_sym) if val <= goal
     }
 
+    # 4. arrays
     # NOTE: all arrays are limited to max size 3 for now
     if ty.is_a?(RDL::Type::GenericType) && ty.base == RDL::Globals.types[:array]
       if ty.params[0] <= RDL::Globals.types[:integer]
@@ -77,7 +83,7 @@ class ExpandHolePass < ::AST::Processor
       end
     end
 
-    # hashes
+    # 5. hashes
     if ty.is_a? RDL::Type::FiniteHashType
       ty.elts.size.times { |i|
         keys = ty.elts.keys.combination(i + 1)
@@ -89,7 +95,7 @@ class ExpandHolePass < ::AST::Processor
       }
     end
 
-    # props
+    # 6. properties
     RDL::Globals.info.info.each { |cls, mthds|
       next if cls.to_s.include?("RDL::")
       mthds.delete(:__getobj__)
@@ -122,7 +128,7 @@ class ExpandHolePass < ::AST::Processor
       }
     }
 
-    # funcs
+    # 7. funcs
     RDL::Globals.info.info.each { |cls, mthds|
       next if cls.to_s.include?("RDL::")
       mthds.delete(:__getobj__)
