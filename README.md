@@ -61,12 +61,9 @@ python3 run_sygus_benchmarks.py # Runs SyGuS strings benchmarks
 
 Do note, that running these benchmarks 11 times will take long time and it is expected that certain benchmarks will timeout (same in the paper). If running the benchmark 11 times is too time consuming, you can pass an additional flag to the above script `-t N` where N is the number of times the benchmarks should be run. The script with executed with `-h` will present these options.
 
-::::: Alert :::::::::::::::::::::::::::::::::::::::::::
-The number of times the benchmark suite will be run is `N + 2`, where `N` is the number passed with `-t` flag. The extra 2 is because the benchmarks are run once to gather numbers without template inference and without caching small expressions.
+**Note:** The number of times the benchmark suite will be run is `N + 2`, where `N` is the number passed with `-t` flag. The extra 2 is because the benchmarks are run once to gather numbers without template inference and without caching small expressions.
 
 It is common to see benchmarks that passed before, fail as they are run in other configurations. The `run_sygus_benchmarks` script executes programs using all features of Absynthe (N times), template inference disabled (1 time), and caching of small expressions disabled (1 time). It is expected that some benchmarks will timeout through these configurations.
-
-:::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
 `table1.csv` will mirror the numbers from Table 1. There might be differences in time for benchmarks because these were run on different machines. We have fixed some bugs in the tool during the paper review period, so there may be some differences in the number of programs tested (`Tested Progs` column). This CSV file can be found on your local machine in the path `scripts/` where you extracted the artifact zip file. This supports the claims made in the Table 1 of the paper.
 
